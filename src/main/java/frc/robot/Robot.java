@@ -15,22 +15,6 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.*;
 import edu.wpi.first.wpilibj.*;
-/*
-import edu.wpi.first.wpilibj.I2C;
-import edu.wpi.first.wpilibj.ADXRS450_Gyro;
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DigitalOutput;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.Relay;
-import edu.wpi.first.wpilibj.SpeedControllerGroup;
-import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.NetworkTableEntry;
-*/
-
 
 /*
 Required Dependencies
@@ -40,12 +24,11 @@ http://www.revrobotics.com/content/sw/max/sdk/REVRobotics.json
 http://revrobotics.com/content/sw/color-sensor-v3/sdk/REVColorSensorV3.json
 */
 
-
 /**
- * TODO Fix button mapping, _gamepadDrive is a XboxController
- * Button Layout / Axis 0 - Left stick left and right Axis 1 - Left stick up and
- * down Axis 2 - L2 Axis 3 - R2 Axis 4 - Right stick left and right Axis 5 -
- * Right stick up and down
+ * TODO Fix button mapping, _gamepadDrive is a XboxController Button Layout /
+ * Axis 0 - Left stick left and right Axis 1 - Left stick up and down Axis 2 -
+ * L2 Axis 3 - R2 Axis 4 - Right stick left and right Axis 5 - Right stick up
+ * and down
  * 
  * Button 1 - x (cross) Button 2 - circle Button 3 - triangle Button 4 - square
  * Button 5 - L1 Button 6 - R1 Button 7 - Unknown Button 8 - start (plus) Button
@@ -75,7 +58,7 @@ public class Robot extends TimedRobot {
   VictorSPX IntakeUpandDown = new VictorSPX(10); // controls the raising/lowering of intake bar itself
   VictorSPX FortuneUpandDown = new VictorSPX(11); // currently unused in code
   VictorSPX toShoot = new VictorSPX(12); // brings the POWERCELL up to the actual firing mechanism
-  VictorSPX elevator = new VictorSPX(13); //elevator system TODO since it features two motors
+  VictorSPX elevator = new VictorSPX(13); // elevator system TODO since it features two motors
 
   /** Gamepad */
   XboxController _gamepadDrive = new XboxController(0); // driving
@@ -124,11 +107,12 @@ public class Robot extends TimedRobot {
   // hatch light
   DigitalOutput hatchLight = new DigitalOutput(9);
 
+  // Control Mapping for PS4
+  boolean circle, square, cross, triangle, up, down, left, right, l1, l3, r1, r3, option, share, l2b, r2b, touchpad, psbutton;
+  double r3h, r3v, l3h, l3v, r2a, l2a;
+  int pov;
+
   // reverse controls
-  boolean circle;
-  boolean x;
-  boolean triangle;
-  boolean square;
   boolean reverseControls = false;
   double reverseControlDelay = 1;
   boolean reverse = false;
@@ -138,6 +122,11 @@ public class Robot extends TimedRobot {
   boolean intakeMove;
   double manualAim;
   boolean toFire;
+  boolean manualOverride;
+
+
+  double forward;
+  double turn;
 
   // safety
   boolean safety = false;
@@ -148,7 +137,6 @@ public class Robot extends TimedRobot {
 
   /** IR Sensor (intake) */
   DigitalInput intakeIR = new DigitalInput(2);
-
 
   /** Color Sensor */
   private final I2C.Port i2cPort = I2C.Port.kOnboard;
@@ -186,37 +174,9 @@ public class Robot extends TimedRobot {
     isValid = cameraTable.getEntry("isValid");
   }
 
-
-  /*ROBOT PERIODIC*/
+  /* ROBOT PERIODIC */
   @Override
   public void robotPeriodic() {
-    SmartDashboard.putNumber("Aim Yaw: ", rotationOffset);
-    SmartDashboard.putNumber("Aim Distance: ", aimDist);
-  }
-
-  /* *****************AUTO INIT***************** */
-  @Override
-  public void autonomousInit() {
-
-  }
-
-  /* *****************AUTO PERIODIC***************** */
-  @Override
-  public void autonomousPeriodic() {
-
-  }
-
-  /* *****************TELEOP INIT***************** */
-  @Override
-  public void teleopInit() {
-    /** Light on */
-    hatchLight.set(true);
-
-  }
-
-  /* *****************TELEOP PERIODIC***************** */
-  @Override
-  public void teleopPeriodic() {
     /* Vision stuff */
     rotationOffset = targetX.getDouble(0.0);
     poseX = poseArray.getDoubleArray(new double[] { 0.0, 0.0, 0.0 })[0];
@@ -225,12 +185,67 @@ public class Robot extends TimedRobot {
     aimDist = Math.sqrt(Math.pow(poseX, 2) + Math.pow(poseY, 2));
     targetFound = isValid.getBoolean(false);
 
-    /** Drive initialization */
-    double forward = 0;
-    double turn = 0;
+    SmartDashboard.putNumber("Aim Yaw: ", rotationOffset);
+    SmartDashboard.putNumber("Aim Distance: ", aimDist);
+    SmartDashboard.putBoolean("Target Found: ", targetFound);
+  }
 
+  /* *****************AUTO INIT***************** */
+  @Override
+  public void autonomousInit() {
+    
+  }
+
+  /* *****************AUTO PERIODIC***************** */
+  @Override
+  public void autonomousPeriodic() {
+    
+  }
+
+  /* *****************TELEOP INIT***************** */
+  @Override
+  public void teleopInit() {
     /** Light on */
     hatchLight.set(true);
+
+    /** Drive initialization */
+    forward = 0;
+    turn = 0;
+
+    // control
+    manualOverride = false;
+  }
+
+  /* *****************TELEOP PERIODIC***************** */
+  @Override
+  public void teleopPeriodic() {
+    cross = _gamepadShoot.getRawButton(2);
+    circle = _gamepadShoot.getRawButton(3);
+    square = _gamepadShoot.getRawButton(1);
+    triangle = _gamepadShoot.getRawButton(4);
+
+    r1 = _gamepadShoot.getRawButton(6);
+    l1 = _gamepadShoot.getRawButton(5);
+
+    r2b = _gamepadShoot.getRawButton(8);
+    l2b = _gamepadShoot.getRawButton(7);
+
+    r3 = _gamepadShoot.getRawButton(12);
+    l3 = _gamepadShoot.getRawButton(11);
+
+    pov = _gamepadShoot.getPOV(); // dpad
+
+    option = _gamepadShoot.getRawButton(10);
+    share = _gamepadShoot.getRawButton(9);
+    psbutton = _gamepadShoot.getRawButton(13);
+    touchpad = _gamepadShoot.getRawButton(14);
+
+    r3h = _gamepadShoot.getRawAxis(2); // r3 horizontal
+    r3v = _gamepadShoot.getRawAxis(5);
+    l3v = _gamepadShoot.getRawAxis(1);
+    l3h = _gamepadShoot.getRawAxis(0);
+    r2a = _gamepadShoot.getRawAxis(4);
+    l2a = _gamepadShoot.getRawAxis(3);
 
     /** gyroscope */
     angle = gyroBoy.getAngle();
@@ -287,12 +302,9 @@ public class Robot extends TimedRobot {
       forward *= -1;
     }
 
-    // adding a small deadzone
-    forward = Deadband(forward);
-    turn = Deadband(turn);
-    // scaling values for sensitivity
-    forward = Scale(forward);
-    turn = Scale(turn);
+    // adding a small deadzone and scale\
+    forward = Scale(Deadband(forward));
+    turn = Scale(Deadband(turn));
 
     /** Arcade Drive */
     Drive.arcadeDrive(forward, turn);
@@ -313,20 +325,26 @@ public class Robot extends TimedRobot {
     /** TODO Elevator */
     // R1 = elevator up
     // L1 = elevator set
-    //boolean eleUP = _gamepadDrive.getBumper(GenericHID.Hand.kRight);
-    //boolean eleDOWN = _gamepadDrive.getBumper(GenericHID.Hand.kLeft);
+    // boolean eleUP = _gamepadDrive.getBumper(GenericHID.Hand.kRight);
+    // boolean eleDOWN = _gamepadDrive.getBumper(GenericHID.Hand.kLeft);
     // make it so if both are pressed, nothing happens
 
     /******************************
      * Shooter Controler (_gamepadShoot)
      ******************************/
     /** Shooting */
-    aiming = _gamepadShoot.getRawButton(5); // L1 button
-    shootSpeed = _gamepadShoot.getRawAxis(2); // L2 analog
-    manualAim = _gamepadShoot.getRawAxis(0); // Left stick analog
-    toFire = _gamepadShoot.getRawButton(7); // R1 button
+    aiming = l2b; // L2 as a button
+    toFire = r1; // R1 button
 
-    if (targetFound && aiming) {
+    shootSpeed = l2a; // L2 analog
+    manualAim = l3h; // Left stick analog
+
+    //override toggle
+    if(_gamepadShoot.getRawButtonPressed(14)){ //touchpad
+      manualOverride = !manualOverride;
+    }
+
+    if (targetFound && aiming && !manualOverride) {
       Shooter.set(ControlMode.PercentOutput, getShootSpeed(aimDist)); // auto aim and set speed (ideally)
       if (rotationOffset > angleTolerance) {
         Aim.set(ControlMode.PercentOutput, -0.5); // TODO placeholder 50% power, figure out optimal value
@@ -335,22 +353,22 @@ public class Robot extends TimedRobot {
       }
     }
 
-    // manual aim and speed set override
-    if (Deadband(manualAim) != 0) { // must use both left stick and L2 analog to fire
-      Shooter.set(ControlMode.PercentOutput, shootSpeed);
+    if (Deadband(manualAim) != 0) {
       Aim.set(ControlMode.PercentOutput, manualAim);
     }
+    //TODO manual speed
 
     // bring the POWERCELL up to the firing mech
     if (toFire) {
       toShoot.set(ControlMode.PercentOutput, 1.0);
+    } else {
+      toShoot.set(ControlMode.PercentOutput, 0.0);
     }
 
     /** Intake */
-    intakeSpeed = _gamepadShoot.getRawAxis(3); // R2 analog stick (TODO maybe important to add reverse?)
-
+    intakeSpeed = _gamepadShoot.getRawAxis(3) - _gamepadShoot.getRawAxis(2); // R2 and L2 analog stick
     IntakeWheel.set(ControlMode.PercentOutput, intakeSpeed);
-    IntakeBelt.set(ControlMode.PercentOutput, intakeIR.get() ? 1.0 : 0.0); // Set speed to 1 if ball is detected, otherwise stop
+    IntakeBelt.set(ControlMode.PercentOutput, intakeIR.get() ? 1.0 : 0.0); // Set belt speed to 1 if ball is detected, otherwise stop
 
     if (_gamepadShoot.getRawButtonPressed(6)) {
       IntakeUpandDown.set(ControlMode.PercentOutput, intakeMove ? 1.0 : -1.0); // TODO determine up/down speeds
@@ -361,14 +379,8 @@ public class Robot extends TimedRobot {
       intakeMove = !intakeMove; // toggle intakeMove to control raise/lower
     }
 
-
     /** Control Panel */
-    x = _gamepadShoot.getRawButton(1);
-    circle = _gamepadShoot.getRawButton(2);
-    triangle = _gamepadShoot.getRawButton(4);
-    square = _gamepadShoot.getRawButton(3);
-
-    if (x) {
+    if (cross) {
 
     }
 
@@ -397,6 +409,7 @@ public class Robot extends TimedRobot {
 
     SmartDashboard.putBoolean("Safety: ", safety);
     SmartDashboard.putBoolean("Reverse: ", reverseControls);
+    SmartDashboard.putBoolean("Manual aim: ", manualOverride);
   }
 
   /** Deadband 3 percent, used on the gamepad */
