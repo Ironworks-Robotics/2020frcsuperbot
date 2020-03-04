@@ -178,6 +178,14 @@ public class Robot extends TimedRobot {
     isValid = cameraTable.getEntry("isValid");
   }
 
+
+  /*ROBOT PERIODIC*/
+  @Override
+  public void robotPeriodic() {
+    SmartDashboard.putNumber("Aim Yaw: ", rotationOffset);
+    SmartDashboard.putNumber("Aim Distance: ", aimDist);
+  }
+
   /* *****************AUTO INIT***************** */
   @Override
   public void autonomousInit() {
@@ -381,9 +389,6 @@ public class Robot extends TimedRobot {
 
     SmartDashboard.putBoolean("Safety: ", safety);
     SmartDashboard.putBoolean("Reverse: ", reverseControls);
-
-    SmartDashboard.putNumber("Aim Yaw: ", rotationOffset);
-    SmartDashboard.putNumber("Aim Distance: ", aimDist);
   }
 
   /** Deadband 3 percent, used on the gamepad */
