@@ -350,14 +350,17 @@ public class Robot extends TimedRobot {
     intakeSpeed = _gamepadShoot.getRawAxis(3); // R2 analog stick (TODO maybe important to add reverse?)
 
     IntakeWheel.set(ControlMode.PercentOutput, intakeSpeed);
-    IntakeBelt.set(ControlMode.PercentOutput, intakeSpeed);
+    IntakeBelt.set(ControlMode.PercentOutput, intakeIR.get() ? 1.0 : 0.0); // Set speed to 1 if ball is detected, otherwise stop
 
     if (_gamepadShoot.getRawButtonPressed(6)) {
-      intakeMove = !intakeMove;
-      IntakeUpandDown.set(ControlMode.PercentOutput, intakeMove ? 1.0 : -1.0);
+      IntakeUpandDown.set(ControlMode.PercentOutput, intakeMove ? 1.0 : -1.0); // TODO determine up/down speeds
     }
 
-    // TODO install limit switches to stop intakeup/down
+    if (limitSwitchUpper.get() || limitSwitchLower.get()) { // if limit switch is hit, set speed 0
+      IntakeUpandDown.set(ControlMode.PercentOutput, 0.0);
+      intakeMove = !intakeMove; // toggle intakeMove to control raise/lower
+    }
+
 
     /** Control Panel */
     x = _gamepadShoot.getRawButton(1);
