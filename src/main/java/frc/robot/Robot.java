@@ -10,7 +10,11 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.networktables.*;
+import edu.wpi.first.wpilibj.*;
 /*
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
@@ -18,22 +22,15 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
-*/
-import edu.wpi.first.wpilibj.GenericHID.Hand;
-/*
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
-*/
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.util.Color;
-/*
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableEntry;
 */
-import edu.wpi.first.networktables.*;
-import edu.wpi.first.wpilibj.*;
+
 
 /*
 Required Dependencies
@@ -271,8 +268,8 @@ public class Robot extends TimedRobot {
      * Driver Controller (_gamepadDrive)
      ******************************/
     /** Gamepad Drive processing */
-    forward = _gamepadDrive.getTriggerAxis(Hand.kRight);
-    turn = _gamepadDrive.getTriggerAxis(Hand.kLeft);
+    forward = _gamepadDrive.getTriggerAxis(GenericHID.Hand.kRight);
+    turn = _gamepadDrive.getTriggerAxis(GenericHID.Hand.kLeft);
 
     if (forward > 0) {
       if ((forward - prevVal) >= 0.07) {
@@ -316,8 +313,8 @@ public class Robot extends TimedRobot {
     /** TODO Elevator */
     // R1 = elevator up
     // L1 = elevator set
-    //boolean eleUP = _gamepadDrive.getBumper(Hand.kRight);
-    //boolean eleDOWN = _gamepadDrive.getBumper(Hand.kLeft);
+    //boolean eleUP = _gamepadDrive.getBumper(GenericHID.Hand.kRight);
+    //boolean eleDOWN = _gamepadDrive.getBumper(GenericHID.Hand.kLeft);
     // make it so if both are pressed, nothing happens
 
     /******************************
