@@ -328,7 +328,7 @@ public class Robot extends TimedRobot {
     }
 
     // manual aim and speed set override
-    if (manualAim != 0) { // must use both left stick and L2 analog to fire
+    if (Deadband(manualAim) != 0) { // must use both left stick and L2 analog to fire
       Shooter.set(ControlMode.PercentOutput, shootSpeed);
       Aim.set(ControlMode.PercentOutput, manualAim);
     }
@@ -346,13 +346,10 @@ public class Robot extends TimedRobot {
 
     if (_gamepadShoot.getRawButtonPressed(6)) {
       intakeMove = !intakeMove;
+      IntakeUpandDown.set(ControlMode.PercentOutput, intakeMove ? 1.0 : -1.0);
     }
 
-    if (intakeMove) {
-      IntakeUpandDown.set(ControlMode.PercentOutput, 1.0);
-    } else {
-      IntakeUpandDown.set(ControlMode.PercentOutput, -1.0);
-    }
+    // TODO install limit switches to stop intakeup/down
 
     /** Control Panel */
     x = _gamepadShoot.getRawButton(1);
