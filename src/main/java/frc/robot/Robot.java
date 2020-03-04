@@ -1,40 +1,51 @@
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.ctre.phoenix.motorcontrol.can.VictorSPX;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-// import edu.wpi.cscore.UsbCamera;
-import edu.wpi.first.wpilibj.I2C;
-// import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.wpilibj.ADXRS450_Gyro;
-// import edu.wpi.first.wpilibj.AnalogInput;
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DigitalOutput;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.GenericHID.Hand;
-import edu.wpi.first.wpilibj.Relay;
-import edu.wpi.first.wpilibj.SpeedControllerGroup;
-import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.util.Color;
 import com.revrobotics.ColorSensorV3;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.ColorMatchResult;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.ColorMatch;
+
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+/*
+import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DigitalOutput;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.XboxController;
+*/
+import edu.wpi.first.wpilibj.GenericHID.Hand;
+/*
+import edu.wpi.first.wpilibj.Relay;
+import edu.wpi.first.wpilibj.SpeedControllerGroup;
+import edu.wpi.first.wpilibj.TimedRobot;
+*/
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.util.Color;
+/*
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableEntry;
+*/
+import edu.wpi.first.networktables.*;
+import edu.wpi.first.wpilibj.*;
 
 /*
+Required Dependencies
+wpilib API
+CTRE Phoenix API
 http://www.revrobotics.com/content/sw/max/sdk/REVRobotics.json
 http://revrobotics.com/content/sw/color-sensor-v3/sdk/REVColorSensorV3.json
 */
 
 
 /**
+ * TODO Fix button mapping, _gamepadDrive is a XboxController
  * Button Layout / Axis 0 - Left stick left and right Axis 1 - Left stick up and
  * down Axis 2 - L2 Axis 3 - R2 Axis 4 - Right stick left and right Axis 5 -
  * Right stick up and down
@@ -299,7 +310,7 @@ public class Robot extends TimedRobot {
       safety = !safety;
 
     /** reverse button */
-    if (_gamepadDrive.getBackButton()) // reverse as back button is pressed
+    if (_gamepadDrive.getBackButton()) // reverse controls as back button is pressed
       reverse = !reverse;
 
     /** TODO Elevator */
