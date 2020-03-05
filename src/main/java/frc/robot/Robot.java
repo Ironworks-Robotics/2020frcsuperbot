@@ -452,8 +452,6 @@ public class Robot extends TimedRobot {
         value = Math.pow(value, 2);
         value *= -1;
       }
-    } else {
-      return 0;
     }
     return value;
   }
