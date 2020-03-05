@@ -48,7 +48,7 @@ public class Robot extends TimedRobot {
   VictorSPX IntakeUpandDown = new VictorSPX(10); // controls the raising/lowering of intake bar itself
   VictorSPX FortuneUpandDown = new VictorSPX(11); // currently unused in code
   VictorSPX toShoot = new VictorSPX(12); // brings the POWERCELL up to the actual firing mechanism
-  VictorSPX elevator = new VictorSPX(13); // elevator system, used for two motors
+  VictorSPX elevator = new VictorSPX(13); // elevator system, used for two motors (one controller)
 
   /** Gamepad */
   XboxController _gamepadDrive = new XboxController(0); // driving
