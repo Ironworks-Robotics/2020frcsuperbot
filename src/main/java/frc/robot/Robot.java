@@ -283,6 +283,7 @@ public class Robot extends TimedRobot {
     forward = triggers(_gamepadDrive.getTriggerAxis(GenericHID.Hand.kRight)) - triggers(_gamepadDrive.getTriggerAxis(GenericHID.Hand.kLeft));
     turn = _gamepadDrive.getX(GenericHID.Hand.kLeft);
 
+    // limit the acceleration / decceleration
     if (forward > 0) {
       if ((forward - prevVal) >= 0.07) {
         forward = prevVal + 0.07;
@@ -362,7 +363,11 @@ public class Robot extends TimedRobot {
     }
 
     if (Deadband(manualAim) != 0) {
-      Aim.set(ControlMode.PercentOutput, manualAim);
+      if(manualAim > 0){
+        Aim.set(ControlMode.PercentOutput, manualAim > 0.5 ? 0.5 : manualAim);
+      } else {
+        Aim.set(ControlMode.PercentOutput, manualAim < -0.5 ? -0.5 : manualAim);
+      }
     }
     //TODO manual speed
 
