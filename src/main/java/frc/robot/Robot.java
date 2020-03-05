@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.*;
 /*
 Required Dependencies
 wpilib API
-CTRE Phoenix API
+http://devsite.ctr-electronics.com/maven/release/com/ctre/phoenix/Phoenix-latest.json
 http://www.revrobotics.com/content/sw/max/sdk/REVRobotics.json
 http://revrobotics.com/content/sw/color-sensor-v3/sdk/REVColorSensorV3.json
 */
