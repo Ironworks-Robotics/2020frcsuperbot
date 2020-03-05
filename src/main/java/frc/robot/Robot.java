@@ -24,19 +24,9 @@ http://www.revrobotics.com/content/sw/max/sdk/REVRobotics.json
 http://revrobotics.com/content/sw/color-sensor-v3/sdk/REVColorSensorV3.json
 */
 
-/**
- * TODO Fix button mapping, _gamepadDrive is a XboxController Button Layout /
- * Axis 0 - Left stick left and right Axis 1 - Left stick up and down Axis 2 -
- * L2 Axis 3 - R2 Axis 4 - Right stick left and right Axis 5 - Right stick up
- * and down
- * 
- * Button 1 - x (cross) Button 2 - circle Button 3 - triangle Button 4 - square
- * Button 5 - L1 Button 6 - R1 Button 7 - Unknown Button 8 - start (plus) Button
- * 9 - end (minus)
- */
+// PS4 Button mapping can be found in ps4_buttons.txt
 
 public class Robot extends TimedRobot {
-
   /** Drive Motor Controllers */
   CANSparkMax leftMaster = new CANSparkMax(3, MotorType.kBrushless);
   CANSparkMax rightMaster = new CANSparkMax(1, MotorType.kBrushless);
@@ -58,7 +48,7 @@ public class Robot extends TimedRobot {
   VictorSPX IntakeUpandDown = new VictorSPX(10); // controls the raising/lowering of intake bar itself
   VictorSPX FortuneUpandDown = new VictorSPX(11); // currently unused in code
   VictorSPX toShoot = new VictorSPX(12); // brings the POWERCELL up to the actual firing mechanism
-  VictorSPX elevator = new VictorSPX(13); // elevator system TODO since it features two motors
+  VictorSPX elevator = new VictorSPX(13); // elevator system, used for two motors
 
   /** Gamepad */
   XboxController _gamepadDrive = new XboxController(0); // driving
@@ -112,21 +102,26 @@ public class Robot extends TimedRobot {
   double r3h, r3v, l3h, l3v, r2a, l2a;
   int pov;
 
-  // reverse controls
+  // controls
   boolean reverseControls = false;
   double reverseControlDelay = 1;
   boolean reverse = false;
+
   boolean aiming = false;
   double shootSpeed;
   double intakeSpeed;
   boolean intakeMove;
   double manualAim;
   boolean toFire;
-  boolean manualOverride;
-
+  boolean manualOverride = false;
 
   double forward;
   double turn;
+
+  boolean eleUp;
+  boolean eleSet;
+
+  Timer timer = new Timer();
 
   // safety
   boolean safety = false;
@@ -188,37 +183,8 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Aim Yaw: ", rotationOffset);
     SmartDashboard.putNumber("Aim Distance: ", aimDist);
     SmartDashboard.putBoolean("Target Found: ", targetFound);
-  }
 
-  /* *****************AUTO INIT***************** */
-  @Override
-  public void autonomousInit() {
-    
-  }
-
-  /* *****************AUTO PERIODIC***************** */
-  @Override
-  public void autonomousPeriodic() {
-    
-  }
-
-  /* *****************TELEOP INIT***************** */
-  @Override
-  public void teleopInit() {
-    /** Light on */
-    hatchLight.set(true);
-
-    /** Drive initialization */
-    forward = 0;
-    turn = 0;
-
-    // control
-    manualOverride = false;
-  }
-
-  /* *****************TELEOP PERIODIC***************** */
-  @Override
-  public void teleopPeriodic() {
+    // PS4 Controls
     cross = _gamepadShoot.getRawButton(2);
     circle = _gamepadShoot.getRawButton(3);
     square = _gamepadShoot.getRawButton(1);
@@ -246,7 +212,37 @@ public class Robot extends TimedRobot {
     l3h = _gamepadShoot.getRawAxis(0);
     r2a = _gamepadShoot.getRawAxis(4);
     l2a = _gamepadShoot.getRawAxis(3);
+  }
 
+  /* *****************AUTO INIT***************** */
+  @Override
+  public void autonomousInit() {
+    // timer.reset();
+  }
+
+  /* *****************AUTO PERIODIC***************** */
+  @Override
+  public void autonomousPeriodic() {
+    // Drive.arcadeDrive(1.0, 0);
+  }
+
+  /* *****************TELEOP INIT***************** */
+  @Override
+  public void teleopInit() {
+    /** Light on */
+    hatchLight.set(true);
+
+    /** Drive initialization */
+    forward = 0;
+    turn = 0;
+
+    // turret controls
+    manualOverride = false;
+  }
+
+  /* *****************TELEOP PERIODIC***************** */
+  @Override
+  public void teleopPeriodic() {
     /** gyroscope */
     angle = gyroBoy.getAngle();
     rate = gyroBoy.getRate();
@@ -284,7 +280,7 @@ public class Robot extends TimedRobot {
      ******************************/
     /** Gamepad Drive processing */
     forward = _gamepadDrive.getTriggerAxis(GenericHID.Hand.kRight);
-    turn = _gamepadDrive.getTriggerAxis(GenericHID.Hand.kLeft);
+    turn = _gamepadDrive.getX(GenericHID.Hand.kLeft);
 
     if (forward > 0) {
       if ((forward - prevVal) >= 0.07) {
@@ -302,9 +298,9 @@ public class Robot extends TimedRobot {
       forward *= -1;
     }
 
-    // adding a small deadzone and scale\
-    forward = Scale(Deadband(forward));
-    turn = Scale(Deadband(turn));
+    // adding a small deadzone and scale
+    forward = Scale(forward); //trigger needs scale, not deadband
+    turn = Deadband(turn); //joystick needs deadband, not scale
 
     /** Arcade Drive */
     Drive.arcadeDrive(forward, turn);
@@ -323,10 +319,23 @@ public class Robot extends TimedRobot {
       reverse = !reverse;
 
     /** TODO Elevator */
-    // R1 = elevator up
-    // L1 = elevator set
-    // boolean eleUP = _gamepadDrive.getBumper(GenericHID.Hand.kRight);
-    // boolean eleDOWN = _gamepadDrive.getBumper(GenericHID.Hand.kLeft);
+    // RB = elevator up
+    // LB = elevator set
+    eleUp = _gamepadDrive.getBumper(GenericHID.Hand.kRight);
+    eleSet = _gamepadDrive.getBumper(GenericHID.Hand.kLeft);
+    
+    if(eleUp && !eleSet){
+      elevator.set(ControlMode.PercentOutput, 0.5);
+    } else {
+      elevator.set(ControlMode.PercentOutput, 0.0);
+    }
+
+    if(eleSet && !eleUp){
+      elevator.set(ControlMode.PercentOutput, -1.0);
+    } else {
+      elevator.set(ControlMode.PercentOutput, 0.0);
+    }
+
     // make it so if both are pressed, nothing happens
 
     /******************************
@@ -337,7 +346,7 @@ public class Robot extends TimedRobot {
     toFire = r1; // R1 button
 
     shootSpeed = l2a; // L2 analog
-    manualAim = l3h; // Left stick analog
+    manualAim = r3h; // Right stick analog
 
     //override toggle
     if(_gamepadShoot.getRawButtonPressed(14)){ //touchpad
@@ -439,7 +448,8 @@ public class Robot extends TimedRobot {
         value = Math.pow(value, 2);
         value *= -1;
       }
-
+    } else {
+      return 0;
     }
 
     return value;
