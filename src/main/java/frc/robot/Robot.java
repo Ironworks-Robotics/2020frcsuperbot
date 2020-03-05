@@ -335,7 +335,7 @@ public class Robot extends TimedRobot {
       elevator.set(ControlMode.PercentOutput, 0.0);
     }
 
-    // make it so if both are pressed, nothing happens
+    // TODO make it so if both are pressed, nothing happens
 
     /******************************
      * Shooter Controler (_gamepadShoot)
