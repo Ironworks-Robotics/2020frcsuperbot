@@ -279,7 +279,8 @@ public class Robot extends TimedRobot {
      * Driver Controller (_gamepadDrive)
      ******************************/
     /** Gamepad Drive processing */
-    forward = _gamepadDrive.getTriggerAxis(GenericHID.Hand.kRight);
+    // forward is RT axis minus LT axis (scaled to [-1, 1])
+    forward = triggers(_gamepadDrive.getTriggerAxis(GenericHID.Hand.kRight)) - triggers(_gamepadDrive.getTriggerAxis(GenericHID.Hand.kLeft));
     turn = _gamepadDrive.getX(GenericHID.Hand.kLeft);
 
     if (forward > 0) {
@@ -298,9 +299,7 @@ public class Robot extends TimedRobot {
       forward *= -1;
     }
 
-    // adding a small deadzone and scale
-    forward = Scale(forward); //trigger needs scale, not deadband
-    turn = Deadband(turn); //joystick needs deadband, not scale
+    turn = Scale(Deadband(turn));
 
     /** Arcade Drive */
     Drive.arcadeDrive(forward, turn);
@@ -375,7 +374,7 @@ public class Robot extends TimedRobot {
     }
 
     /** Intake */
-    intakeSpeed = _gamepadShoot.getRawAxis(3) - _gamepadShoot.getRawAxis(2); // R2 and L2 analog stick
+    intakeSpeed = r2a - l2a; // R2 and L2 analog stick
     IntakeWheel.set(ControlMode.PercentOutput, intakeSpeed);
     IntakeBelt.set(ControlMode.PercentOutput, intakeIR.get() ? 1.0 : 0.0); // Set belt speed to 1 if ball is detected, otherwise stop
 
@@ -451,8 +450,12 @@ public class Robot extends TimedRobot {
     } else {
       return 0;
     }
-
     return value;
+  }
+
+  // Scales trigger values from [-1, 1] to [0, 1] (default -1 unpressed)
+  double triggers(double value) {
+    return (value * 0.5) + 0.5;
   }
 
   // TODO find relationship between percent power of shooterspeed and distance
