@@ -27,6 +27,10 @@ http://revrobotics.com/content/sw/color-sensor-v3/sdk/REVColorSensorV3.json
 // PS4 Button mapping can be found in ps4_buttons.txt
 
 public class Robot extends TimedRobot {
+  //PDP
+  PowerDistributionPanel pdp = new PowerDistributionPanel();
+  double current[] = new double[16];
+
   /** Drive Motor Controllers */
   CANSparkMax leftMaster = new CANSparkMax(3, MotorType.kBrushless);
   CANSparkMax rightMaster = new CANSparkMax(1, MotorType.kBrushless);
@@ -172,6 +176,10 @@ public class Robot extends TimedRobot {
   /* ROBOT PERIODIC */
   @Override
   public void robotPeriodic() {
+    for (int i = 0; i < current.length; i++) {
+      current[i] = pdp.getCurrent(i);
+    }
+
     /* Vision stuff */
     rotationOffset = targetX.getDouble(0.0);
     poseX = poseArray.getDoubleArray(new double[] { 0.0, 0.0, 0.0 })[0];
