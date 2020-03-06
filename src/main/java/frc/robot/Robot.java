@@ -39,14 +39,13 @@ public class Robot extends TimedRobot {
   DifferentialDrive Drive = new DifferentialDrive(leftGrouping, rightGrouping);
 
   /** Other Motor Controllers */
-  TalonSRX temp = new TalonSRX(5);
+  TalonSRX toShoot = new TalonSRX(5); // brings the POWERCELL up to the actual firing mechanism
   VictorSPX Shooter = new VictorSPX(6); // controls turret launch motor
   Victor Aim = new Victor(7); // controls turret aim motor
   VictorSPX IntakeWheel = new VictorSPX(8); // controls the intake wheels
   VictorSPX IntakeBelt = new VictorSPX(9); // controls the intake elevator motor
   VictorSPX IntakeUpandDown = new VictorSPX(10); // controls the raising/lowering of intake bar itself
-  VictorSPX FortuneUpandDown = new VictorSPX(11); // currently unused in code
-  VictorSPX toShoot = new VictorSPX(12); // brings the POWERCELL up to the actual firing mechanism
+  VictorSPX temp = new VictorSPX(12); 
   VictorSPX elevator = new VictorSPX(13); // elevator system, used for two motors (one controller)
 
   /** Gamepad */
@@ -272,7 +271,7 @@ public class Robot extends TimedRobot {
       forward *= -1;
     }
 
-    turn = Scale(Deadband(turn));
+    turn = Scale(Deadband(_gamepadDrive.getX(GenericHID.Hand.kLeft)));
 
     /** Arcade Drive */
     Drive.arcadeDrive(forward, turn);
