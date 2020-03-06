@@ -39,10 +39,9 @@ public class Robot extends TimedRobot {
   DifferentialDrive Drive = new DifferentialDrive(leftGrouping, rightGrouping);
 
   /** Other Motor Controllers */
-  TalonSRX FortuneWheel = new TalonSRX(5); // currently unused in code
-
+  TalonSRX temp = new TalonSRX(5);
   VictorSPX Shooter = new VictorSPX(6); // controls turret launch motor
-  VictorSPX Aim = new VictorSPX(7); // controls turret aim motor
+  Victor Aim = new Victor(7); // controls turret aim motor
   VictorSPX IntakeWheel = new VictorSPX(8); // controls the intake wheels
   VictorSPX IntakeBelt = new VictorSPX(9); // controls the intake elevator motor
   VictorSPX IntakeUpandDown = new VictorSPX(10); // controls the raising/lowering of intake bar itself
@@ -308,8 +307,6 @@ public class Robot extends TimedRobot {
       elevator.set(ControlMode.PercentOutput, 0.0);
     }
 
-    // TODO make it so if both are pressed, nothing happens
-
     /******************************
      * Shooter Controler (_gamepadShoot)
      ******************************/
@@ -328,17 +325,17 @@ public class Robot extends TimedRobot {
     if (targetFound && aiming && !manualOverride) {
       Shooter.set(ControlMode.PercentOutput, getShootSpeed(aimDist)); // auto aim and set speed (ideally)
       if (rotationOffset > angleTolerance) {
-        Aim.set(ControlMode.PercentOutput, -0.5); // TODO placeholder 50% power, figure out optimal value
+        Aim.set(-0.5); // TODO placeholder 50% power, figure out optimal value
       } else if (rotationOffset < -angleTolerance) {
-        Aim.set(ControlMode.PercentOutput, 0.5);
+        Aim.set(0.5);
       }
     }
 
     if (Deadband(manualAim) != 0) {
       if(manualAim > 0){
-        Aim.set(ControlMode.PercentOutput, manualAim > 0.5 ? 0.5 : manualAim);
+        Aim.set(manualAim > 0.5 ? 0.5 : manualAim);
       } else {
-        Aim.set(ControlMode.PercentOutput, manualAim < -0.5 ? -0.5 : manualAim);
+        Aim.set(manualAim < -0.5 ? -0.5 : manualAim);
       }
     }
     //TODO manual speed
