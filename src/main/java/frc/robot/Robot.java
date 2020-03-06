@@ -103,8 +103,10 @@ public class Robot extends TimedRobot {
 
   // controls
   boolean reverseControls = false;
-  double reverseControlDelay = 1;
-  boolean reverse = false;
+
+  // unreferenced:
+  // double reverseControlDelay = 1;
+  // boolean reverse = false;
 
   boolean aiming = false;
   double shootSpeed;
@@ -205,7 +207,7 @@ public class Robot extends TimedRobot {
   /* *****************AUTO INIT***************** */
   @Override
   public void autonomousInit() {
-    // timer.reset();
+    timer.reset();
   }
 
   /* *****************AUTO PERIODIC***************** */
@@ -251,8 +253,7 @@ public class Robot extends TimedRobot {
      ******************************/
     /** Gamepad Drive processing */
     // forward is RT axis minus LT axis (scaled to [-1, 1])
-    forward = triggers(_gamepadDrive.getTriggerAxis(GenericHID.Hand.kRight)) - triggers(_gamepadDrive.getTriggerAxis(GenericHID.Hand.kLeft));
-    turn = _gamepadDrive.getX(GenericHID.Hand.kLeft);
+    forward = Scale(triggers(_gamepadDrive.getTriggerAxis(GenericHID.Hand.kRight))) - Scale(triggers(_gamepadDrive.getTriggerAxis(GenericHID.Hand.kLeft)));
 
     // limit the acceleration / decceleration
     if (forward > 0) {
@@ -286,8 +287,8 @@ public class Robot extends TimedRobot {
       safety = !safety;
 
     /** reverse button */
-    if (_gamepadDrive.getBackButton()) // reverse controls as back button is pressed
-      reverse = !reverse;
+    if (_gamepadDrive.getBackButtonPressed()) // reverse controls if back button is pressed
+      reverseControls = !reverseControls;
 
     /** TODO Elevator */
     // RB = elevator up
@@ -407,7 +408,7 @@ public class Robot extends TimedRobot {
    * the joystick is barely moved, but allows for full power
    */
   double Scale(double value) {
-    value *= -1;
+    /* value *= -1;
     if (value >= -0.9 && value <= 0.9) {
       if (value > 0) {
         value = Math.pow(value, 2);
@@ -416,10 +417,15 @@ public class Robot extends TimedRobot {
         value *= -1;
       }
     }
-    return value;
+    return value; */
+    if (value < 0) {
+      return -Math.pow(2, -value) + 1;
+    } else {
+      return Math.pow(2, value) - 1;
+    }
   }
 
-  // Scales trigger values from [-1, 1] to [0, 1] (default -1 unpressed)
+  // Linear scale that changes [-1, 1] to [0, 1]
   double triggers(double value) {
     return (value * 0.5) + 0.5;
   }
