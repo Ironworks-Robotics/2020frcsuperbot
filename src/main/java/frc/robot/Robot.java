@@ -39,12 +39,22 @@ public class Robot extends TimedRobot {
   DifferentialDrive Drive = new DifferentialDrive(leftMaster, rightMaster);
 
   /** Other Motor Controllers */
+  /* the talon is broken
   TalonSRX toShoot = new TalonSRX(13); // brings the POWERCELL up to the actual firing mechanism
+  */
   VictorSPX Shooter = new VictorSPX(9); // controls turret launch motor
   VictorSPX Aim = new VictorSPX(7); // controls turret aim motor
-  VictorSPX IntakeWheel = new VictorSPX(6); // controls the intake wheels
+  
+  // IntakeWheel is now going to turn into toShoot
+  // VictorSPX IntakeWheel = new VictorSPX(6); // controls the intake wheels
+  VictorSPX toShoot = new VictorSPX(6);
+
   VictorSPX IntakeBelt = new VictorSPX(11); // controls the intake elevator motor
+  
+  /* getting rid of this trash
   Victor IntakeUpandDown = new Victor(1); // controls the raising/lowering of intake bar itself
+  */
+
   VictorSPX elevator1 = new VictorSPX(8); // elevator system, used for two motors, two controllers
   VictorSPX elevator2 = new VictorSPX(10);
 
@@ -390,9 +400,9 @@ public class Robot extends TimedRobot {
 
     if (Deadband(manualAim) != 0) {
       if (manualAim > 0) {
-        Aim.set(ControlMode.PercentOutput, manualAim > 0.1 ? 0.1 : manualAim);
+        Aim.set(ControlMode.PercentOutput, manualAim > 0.25 ? 0.25 : manualAim);
       } else {
-        Aim.set(ControlMode.PercentOutput, manualAim < -0.1 ? -0.1 : manualAim);
+        Aim.set(ControlMode.PercentOutput, manualAim < -0.25 ? -0.25 : manualAim);
       }
     }
 
