@@ -6,11 +6,13 @@ import com.revrobotics.CANSparkMax;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
-
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.networktables.*;
 import edu.wpi.first.wpilibj.*;
+
 
 /*
 Required Dependencies
@@ -23,36 +25,36 @@ http://revrobotics.com/content/sw/color-sensor-v3/sdk/REVColorSensorV3.json
 // PS4 Button mapping can be found in ps4_buttons.txt
 
 public class Robot extends TimedRobot {
-  //PDP
-  PowerDistributionPanel pdp = new PowerDistributionPanel();
-  double current[] = new double[16];
+  // PDP
+  // PowerDistributionPanel pdp = new PowerDistributionPanel();
+  // double current[] = new double[16];
 
   /** Drive Motor Controllers */
-  CANSparkMax leftMaster = new CANSparkMax(3, MotorType.kBrushless);
-  CANSparkMax rightMaster = new CANSparkMax(1, MotorType.kBrushless);
-  CANSparkMax leftSide = new CANSparkMax(4, MotorType.kBrushless);
-  CANSparkMax rightSide = new CANSparkMax(2, MotorType.kBrushless);
+  CANSparkMax rightMaster = new CANSparkMax(3, MotorType.kBrushless);
+  CANSparkMax leftMaster = new CANSparkMax(4, MotorType.kBrushless);
+  
+  //SpeedControllerGroup leftGrouping = new SpeedControllerGroup(leftMaster, leftSide);
+  //SpeedControllerGroup rightGrouping = new SpeedControllerGroup(rightMaster, rightSide);
 
-  SpeedControllerGroup leftGrouping = new SpeedControllerGroup(leftMaster, leftSide);
-  SpeedControllerGroup rightGrouping = new SpeedControllerGroup(rightMaster, rightSide);
-
-  DifferentialDrive Drive = new DifferentialDrive(leftGrouping, rightGrouping);
+  DifferentialDrive Drive = new DifferentialDrive(leftMaster, rightMaster);
 
   /** Other Motor Controllers */
-  TalonSRX toShoot = new TalonSRX(5); // brings the POWERCELL up to the actual firing mechanism
-  VictorSPX Shooter = new VictorSPX(6); // controls turret launch motor
-  Victor Aim = new Victor(7); // controls turret aim motor
-  VictorSPX IntakeWheel = new VictorSPX(8); // controls the intake wheels
-  VictorSPX IntakeBelt = new VictorSPX(9); // controls the intake elevator motor
-  VictorSPX IntakeUpandDown = new VictorSPX(10); // controls the raising/lowering of intake bar itself
-  VictorSPX temp = new VictorSPX(12); 
-  VictorSPX elevator = new VictorSPX(13); // elevator system, used for two motors (one controller)
+  TalonSRX toShoot = new TalonSRX(13); // brings the POWERCELL up to the actual firing mechanism
+  VictorSPX Shooter = new VictorSPX(9); // controls turret launch motor
+  VictorSPX Aim = new VictorSPX(7); // controls turret aim motor
+  VictorSPX IntakeWheel = new VictorSPX(6); // controls the intake wheels
+  VictorSPX IntakeBelt = new VictorSPX(11); // controls the intake elevator motor
+  Victor IntakeUpandDown = new Victor(1); // controls the raising/lowering of intake bar itself
+  VictorSPX elevator1 = new VictorSPX(8); // elevator system, used for two motors, two controllers
+  VictorSPX elevator2 = new VictorSPX(10);
 
   /** Gamepad */
   XboxController _gamepadDrive = new XboxController(0); // driving
   Joystick _gamepadShoot = new Joystick(1); // turret control
 
   /** Vision / Raspberry Pi */
+
+  /*
   NetworkTableInstance table = NetworkTableInstance.getDefault();
   NetworkTable cameraTable = table.getTable("chameleon-vision").getSubTable("TurretCam");
   NetworkTableEntry targetX;
@@ -65,6 +67,7 @@ public class Robot extends TimedRobot {
   double poseX; // X distance in meters
   double poseY; // Y distance in meters
   double aimDist; // distance magnitude in meters (pythagorean)
+  */
 
   // autonomous
   int count = 0;
@@ -82,7 +85,7 @@ public class Robot extends TimedRobot {
   boolean gyroConnected = false;
 
   // speed divider
-  double speedDiv = 4.0;
+  //double speedDiv = 4.0;
 
   // ramping
   double prevVal = 0;
@@ -96,7 +99,8 @@ public class Robot extends TimedRobot {
   DigitalOutput hatchLight = new DigitalOutput(9);
 
   // Control Mapping for PS4
-  boolean circle, square, cross, triangle, up, down, left, right, l1, l3, r1, r3, option, share, l2b, r2b, touchpad, psbutton;
+  boolean circle, square, cross, triangle, up, down, left, right, l1, l3, r1, r3, option, share, l2b, r2b, touchpad,
+      psbutton;
   double r3h, r3v, l3h, l3v, r2a, l2a;
   int pov;
 
@@ -115,11 +119,16 @@ public class Robot extends TimedRobot {
   boolean toFire;
   boolean manualOverride = false;
 
+  int autocount;
+
   double forward;
   double turn;
 
   boolean eleUp;
   boolean eleSet;
+  boolean canClimb;
+
+  UsbCamera camera;
 
   Timer timer = new Timer();
 
@@ -132,36 +141,42 @@ public class Robot extends TimedRobot {
 
   /** IR Sensor (intake) */
   DigitalInput intakeIR = new DigitalInput(2);
+
   /* *****************ROBOT INIT***************** */
   @Override
   public void robotInit() {
     gyroBoy.calibrate();
 
+    camera = CameraServer.getInstance().startAutomaticCapture(0);
+
     lights.set(lightsOn);
 
     /* Configure output direction */
     leftMaster.setInverted(false);
-    leftSide.setInverted(false);
+    // leftSide.setInverted(false);
     rightMaster.setInverted(false);
-    rightSide.setInverted(false);
+    // rightSide.setInverted(false);
 
     // turns lights off
     lights.set(lightsOn);
 
     // Get initial values (Vision)
+/*
     targetX = cameraTable.getEntry("yaw");
     poseArray = cameraTable.getEntry("targetPose");
     isValid = cameraTable.getEntry("isValid");
+*/
   }
 
   /* ROBOT PERIODIC */
   @Override
   public void robotPeriodic() {
-    for (int i = 0; i < current.length; i++) {
-      current[i] = pdp.getCurrent(i);
-    }
+    // for (int i = 0; i < current.length; i++) {
+    // current[i] = pdp.getCurrent(i);
+    // }
 
     /* Vision stuff */
+/*
     rotationOffset = targetX.getDouble(0.0);
     poseX = poseArray.getDoubleArray(new double[] { 0.0, 0.0, 0.0 })[0];
     poseY = poseArray.getDoubleArray(new double[] { 0.0, 0.0, 0.0 })[1];
@@ -172,7 +187,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Aim Yaw: ", rotationOffset);
     SmartDashboard.putNumber("Aim Distance: ", aimDist);
     SmartDashboard.putBoolean("Target Found: ", targetFound);
-
+*/
     // PS4 Controls
     cross = _gamepadShoot.getRawButton(2);
     circle = _gamepadShoot.getRawButton(3);
@@ -207,17 +222,30 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     timer.reset();
+    timer.start();
+    autocount = 0;
   }
 
   /* *****************AUTO PERIODIC***************** */
   @Override
   public void autonomousPeriodic() {
-    // Drive.arcadeDrive(1.0, 0);
+    // 719 long
+    // 48 is 1 second
+    
+
+    if (timer.get() <= 5) {
+      Drive.arcadeDrive(0.5, 0);
+    } else {
+      Drive.arcadeDrive(0.0, 0.0);
+    }
+
   }
 
   /* *****************TELEOP INIT***************** */
   @Override
   public void teleopInit() {
+    rightMaster.setInverted(true);
+
     /** Light on */
     hatchLight.set(true);
 
@@ -248,17 +276,19 @@ public class Robot extends TimedRobot {
     }
 
     /******************************
-     * Driver Controller (_gamepadDrive)
+     * Driver Contro  ller (_gamepadDrive)
      ******************************/
     /** Gamepad Drive processing */
     // forward is RT axis minus LT axis (scaled to [-1, 1])
-    forward = Scale(triggers(_gamepadDrive.getTriggerAxis(GenericHID.Hand.kRight))) - Scale(triggers(_gamepadDrive.getTriggerAxis(GenericHID.Hand.kLeft)));
+    forward = _gamepadDrive.getTriggerAxis(GenericHID.Hand.kRight)
+        - _gamepadDrive.getTriggerAxis(GenericHID.Hand.kLeft);
 
+    /*
     // limit the acceleration / decceleration
     if (forward > 0) {
       if ((forward - prevVal) >= 0.07) {
         forward = prevVal + 0.07;
-      }
+      }P
     } else {
       if ((forward - prevVal) <= -0.07) {
         forward = prevVal - 0.07;
@@ -266,116 +296,136 @@ public class Robot extends TimedRobot {
     }
 
     prevVal = forward;
-
-    if (!reverseControls) {
-      forward *= -1;
-    }
-
-    turn = Scale(Deadband(_gamepadDrive.getX(GenericHID.Hand.kLeft)));
-
-    /** Arcade Drive */
-    Drive.arcadeDrive(forward, turn);
-
-    if (safety) {
-      forward /= speedDiv;
-      turn /= speedDiv;
-    }
-
-    /** check safety mode */
-    if (_gamepadDrive.getStartButtonPressed()) // start button toggles safety
-      safety = !safety;
+    */
 
     /** reverse button */
     if (_gamepadDrive.getBackButtonPressed()) // reverse controls if back button is pressed
       reverseControls = !reverseControls;
+    
+    if (!reverseControls) {
+      forward *= -1;
+    }
+
+    turn = Deadband(_gamepadDrive.getX(GenericHID.Hand.kLeft));
+
+   
+    /** check safety mode */
+    if (_gamepadDrive.getStartButtonPressed()) // start button toggles safety
+      safety = !safety;
+    
+    if (safety) {
+  //    forward /= speedDiv;
+  //    turn /= speedDiv;
+    }
+    /** Arcade Drive */
+    Drive.arcadeDrive(turn, forward);
 
     /** TODO Elevator */
     // RB = elevator up
     // LB = elevator set
-    eleUp = _gamepadDrive.getBumper(GenericHID.Hand.kRight);
-    eleSet = _gamepadDrive.getBumper(GenericHID.Hand.kLeft);
-    
-    if(eleUp && !eleSet){
-      elevator.set(ControlMode.PercentOutput, 0.5);
-    } else {
-      elevator.set(ControlMode.PercentOutput, 0.0);
+
+    if (_gamepadDrive.getXButtonPressed()) {
+      canClimb = true;
     }
 
-    if(eleSet && !eleUp){
-      elevator.set(ControlMode.PercentOutput, -1.0);
+    if (canClimb) {
+      eleUp = _gamepadDrive.getBumper(GenericHID.Hand.kRight);
+      eleSet = _gamepadDrive.getBumper(GenericHID.Hand.kLeft);
+    }
+
+    if (eleUp && !eleSet) {
+      elevator1.set(ControlMode.PercentOutput, 1);
+      elevator2.set(ControlMode.PercentOutput, 1);
     } else {
-      elevator.set(ControlMode.PercentOutput, 0.0);
+      elevator1.set(ControlMode.PercentOutput, 0.0);
+      elevator2.set(ControlMode.PercentOutput, 0.0);
+    }
+
+    if (eleSet && !eleUp) {
+      elevator1.set(ControlMode.PercentOutput, -1);
+      elevator2.set(ControlMode.PercentOutput, -1);
+    } else {
+      elevator1.set(ControlMode.PercentOutput, 0.0);
+      elevator2.set(ControlMode.PercentOutput, 0.0);
     }
 
     /******************************
      * Shooter Controler (_gamepadShoot)
      ******************************/
     /** Shooting */
-    aiming = l2b; // L2 as a button
-    toFire = r1; // R1 button
+    aiming = circle; // L2 as a button
+    toFire = cross; // R1 button
 
     shootSpeed = l2a; // L2 analog
     manualAim = r3h; // Right stick analog
+    double manualUpandDown = l3h; // Left stick analog
 
-    //override toggle
-    if(_gamepadShoot.getRawButtonPressed(14)){ //touchpad
+    // override toggle
+    if (_gamepadShoot.getRawButtonPressed(14)) { // touchpad
       manualOverride = !manualOverride;
     }
 
+    /*
     if (targetFound && aiming && !manualOverride) {
-      Shooter.set(ControlMode.PercentOutput, getShootSpeed(aimDist)); // auto aim and set speed (ideally)
+      // Shooter.set(ControlMode.PercentOutput, getShootSpeed(aimDist)); // auto aim
+      // and set speed (ideally)
       if (rotationOffset > angleTolerance) {
-        Aim.set(-0.5); // TODO placeholder 50% power, figure out optimal value
+        Aim.set(ControlMode.PercentOutput, -0.25);
       } else if (rotationOffset < -angleTolerance) {
-        Aim.set(0.5);
+        Aim.set(ControlMode.PercentOutput, 0.25);
       }
+    }
+    */
+
+    // Shooter override
+    if (triangle) {
+      Shooter.set(ControlMode.PercentOutput, 1);
+      toShoot.set(ControlMode.PercentOutput, 1);
+      IntakeBelt.set(ControlMode.PercentOutput, 1);
+    } else {
+      Shooter.set(ControlMode.PercentOutput, 0);
+      toShoot.set(ControlMode.PercentOutput, 0);
+      IntakeBelt.set(ControlMode.PercentOutput, 0);
     }
 
     if (Deadband(manualAim) != 0) {
-      if(manualAim > 0){
-        Aim.set(manualAim > 0.5 ? 0.5 : manualAim);
+      if (manualAim > 0) {
+        Aim.set(ControlMode.PercentOutput, manualAim > 0.1 ? 0.1 : manualAim);
       } else {
-        Aim.set(manualAim < -0.5 ? -0.5 : manualAim);
+        Aim.set(ControlMode.PercentOutput, manualAim < -0.1 ? -0.1 : manualAim);
       }
     }
-    //TODO manual speed
 
     // bring the POWERCELL up to the firing mech
     if (toFire) {
-      toShoot.set(ControlMode.PercentOutput, 1.0);
+      toShoot.set(ControlMode.PercentOutput, 0.5);
     } else {
       toShoot.set(ControlMode.PercentOutput, 0.0);
     }
 
     /** Intake */
-    intakeSpeed = r2a - l2a; // R2 and L2 analog stick
-    IntakeWheel.set(ControlMode.PercentOutput, intakeSpeed);
-    IntakeBelt.set(ControlMode.PercentOutput, intakeIR.get() ? 1.0 : 0.0); // Set belt speed to 1 if ball is detected, otherwise stop
+    intakeSpeed = Scale(triggers(r2a)) - Scale(triggers(l2a));
+    ; // R2 and L2 analog stick
+    IntakeWheel.set(ControlMode.PercentOutput, -intakeSpeed);
+    // IntakeBelt.set(ControlMode.PercentOutput, intakeIR.get() ? 1.0 : 0.0); // Set
+    // belt speed to 1 if ball is detected, otherwise stop
+    IntakeBelt.set(ControlMode.PercentOutput, intakeSpeed);
 
-    if (_gamepadShoot.getRawButtonPressed(6)) {
-      IntakeUpandDown.set(ControlMode.PercentOutput, intakeMove ? 1.0 : -1.0); // TODO determine up/down speeds
+    // if (_gamepadShoot.getRawButtonPressed(6) && false) {
+    //  IntakeUpandDown.set(intakeMove ? 0.5 : -0.5);
+    // }
+
+    if (Deadband(manualUpandDown) > 0) {
+      IntakeUpandDown.setRaw(255);
+    } else if (Deadband(manualUpandDown) < 0) {
+      IntakeUpandDown.setRaw(0);
+    } else {
+      IntakeUpandDown.setRaw(127);
     }
 
-    if (limitSwitchUpper.get() || limitSwitchLower.get()) { // if limit switch is hit, set speed 0
-      IntakeUpandDown.set(ControlMode.PercentOutput, 0.0);
+    if (limitSwitchUpper.get() || limitSwitchLower.get() && false) { // if limit switch is hit, set speed 0
+      IntakeUpandDown.set(0.0);
       intakeMove = !intakeMove; // toggle intakeMove to control raise/lower
-    }
-
-    /** Control Panel */
-    if (cross) {
-
-    }
-
-    if (circle) {
-
-    }
-
-    if (triangle) {
-
-    }
-
-    if (square) {
-
     }
 
     /** Smart Dashboard */
@@ -383,9 +433,34 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Rate: ", rate);
     SmartDashboard.putBoolean("gyro Connected: ", gyroConnected);
 
+    SmartDashboard.putBoolean("Can Climb: ", canClimb);
+    SmartDashboard.putBoolean("eleUp: ", eleUp);
+    SmartDashboard.putBoolean("eleSet: ", eleSet);
+
+    SmartDashboard.putBoolean("circle", circle);
+    SmartDashboard.putBoolean("square", square);
+    SmartDashboard.putBoolean("cross", cross);
+    SmartDashboard.putBoolean("triangle", triangle);
+    SmartDashboard.putBoolean("up", up);
+    SmartDashboard.putBoolean("down", down);
+    SmartDashboard.putBoolean("left", left);
+    SmartDashboard.putBoolean("right", right);
+    SmartDashboard.putBoolean("l1", l1);
+    SmartDashboard.putBoolean("l3", l3);
+    SmartDashboard.putBoolean("r1", r1);
+    SmartDashboard.putBoolean("r3", r3);
+    SmartDashboard.putBoolean("option", option);
+    SmartDashboard.putBoolean("share", share);
+    SmartDashboard.putBoolean("l2b", l2b);
+    SmartDashboard.putBoolean("r2b", r2b);
+    SmartDashboard.putBoolean("touchpad", touchpad);
+    SmartDashboard.putBoolean("psbutton", psbutton);
+    SmartDashboard.putBoolean("toFire: ", toFire);
     SmartDashboard.putBoolean("Safety: ", safety);
+    SmartDashboard.putNumber("manualupdown", manualUpandDown);
     SmartDashboard.putBoolean("Reverse: ", reverseControls);
     SmartDashboard.putBoolean("Manual aim: ", manualOverride);
+
   }
 
   /** Deadband 3 percent, used on the gamepad */
@@ -407,16 +482,11 @@ public class Robot extends TimedRobot {
    * the joystick is barely moved, but allows for full power
    */
   double Scale(double value) {
-    /* value *= -1;
-    if (value >= -0.9 && value <= 0.9) {
-      if (value > 0) {
-        value = Math.pow(value, 2);
-      } else {
-        value = Math.pow(value, 2);
-        value *= -1;
-      }
-    }
-    return value; */
+    /*
+     * value *= -1; if (value >= -0.9 && value <= 0.9) { if (value > 0) { value =
+     * Math.pow(value, 2); } else { value = Math.pow(value, 2); value *= -1; } }
+     * return value;
+     */
     if (value < 0) {
       return -Math.pow(2, -value) + 1;
     } else {
