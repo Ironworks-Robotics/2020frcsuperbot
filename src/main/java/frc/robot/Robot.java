@@ -415,8 +415,8 @@ public class Robot extends TimedRobot {
 
     /** Intake */
     intakeSpeed = Scale(triggers(r2a)) - Scale(triggers(l2a));
-    ; // R2 and L2 analog stick
-    IntakeWheel.set(ControlMode.PercentOutput, -intakeSpeed);
+    // R2 and L2 analog stick
+    // IntakeWheel.set(ControlMode.PercentOutput, -intakeSpeed);
     // IntakeBelt.set(ControlMode.PercentOutput, intakeIR.get() ? 1.0 : 0.0); // Set
     // belt speed to 1 if ball is detected, otherwise stop
     IntakeBelt.set(ControlMode.PercentOutput, intakeSpeed);
