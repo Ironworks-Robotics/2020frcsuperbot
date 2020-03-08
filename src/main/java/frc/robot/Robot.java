@@ -425,6 +425,7 @@ public class Robot extends TimedRobot {
     //  IntakeUpandDown.set(intakeMove ? 0.5 : -0.5);
     // }
 
+    /*
     if (Deadband(manualUpandDown) > 0) {
       IntakeUpandDown.setRaw(255);
     } else if (Deadband(manualUpandDown) < 0) {
@@ -432,11 +433,13 @@ public class Robot extends TimedRobot {
     } else {
       IntakeUpandDown.setRaw(127);
     }
-
+    */
+    /*
     if (limitSwitchUpper.get() || limitSwitchLower.get() && false) { // if limit switch is hit, set speed 0
       IntakeUpandDown.set(0.0);
       intakeMove = !intakeMove; // toggle intakeMove to control raise/lower
     }
+    */
 
     /** Smart Dashboard */
     SmartDashboard.putNumber("Angle: ", angle);
