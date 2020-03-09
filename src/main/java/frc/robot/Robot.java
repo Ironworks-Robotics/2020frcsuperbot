@@ -4,13 +4,13 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+// import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.cscore.UsbCamera;
-import edu.wpi.first.networktables.*;
+// import edu.wpi.first.networktables.*;
 import edu.wpi.first.wpilibj.*;
 
 
@@ -32,6 +32,7 @@ public class Robot extends TimedRobot {
   /** Drive Motor Controllers */
   CANSparkMax rightMaster = new CANSparkMax(3, MotorType.kBrushless);
   CANSparkMax leftMaster = new CANSparkMax(4, MotorType.kBrushless);
+  
   
   //SpeedControllerGroup leftGrouping = new SpeedControllerGroup(leftMaster, leftSide);
   //SpeedControllerGroup rightGrouping = new SpeedControllerGroup(rightMaster, rightSide);
@@ -163,8 +164,10 @@ public class Robot extends TimedRobot {
 
     /* Configure output direction */
     leftMaster.setInverted(false);
+    leftMaster.restoreFactoryDefaults();
     // leftSide.setInverted(false);
     rightMaster.setInverted(false);
+    rightMaster.restoreFactoryDefaults();
     // rightSide.setInverted(false);
 
     // turns lights off
@@ -334,9 +337,7 @@ public class Robot extends TimedRobot {
     // RB = elevator up
     // LB = elevator set
 
-    if (_gamepadDrive.getXButtonPressed()) {
-      canClimb = true;
-    }
+    canClimb = _gamepadDrive.getXButtonPressed();
 
     if (canClimb) {
       eleUp = _gamepadDrive.getBumper(GenericHID.Hand.kRight);
