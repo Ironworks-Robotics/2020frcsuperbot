@@ -2,16 +2,22 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.drive.*;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
 import frc.robot.Constants;
 
 public class Drivetrain{
+    /*
     private static CANSparkMax fr;
     private static CANSparkMax br;
     private static CANSparkMax fl;
     private static CANSparkMax bl;
+    */
+
+    private static WPI_VictorSPX fr;
+    private static WPI_VictorSPX br;
+    private static WPI_VictorSPX fl;
+    private static WPI_VictorSPX bl;
     private static SpeedControllerGroup leftGroup;
     private static SpeedControllerGroup rightGroup;
     public static DifferentialDrive drivetrain;
@@ -19,10 +25,10 @@ public class Drivetrain{
 
     public static void init(boolean leftInvert, boolean rightInvert){
         // init motor controllers
-        fr = new CANSparkMax(Constants.CAN.driveRightMaster, MotorType.kBrushed);
-        br = new CANSparkMax(Constants.CAN.driveRightSlave, MotorType.kBrushed);
-        fl = new CANSparkMax(Constants.CAN.driveLeftMaster, MotorType.kBrushed);
-        bl = new CANSparkMax(Constants.CAN.driveLeftSlave, MotorType.kBrushed);
+        fr = new WPI_VictorSPX(Constants.CAN.driveRightMaster);
+        br = new WPI_VictorSPX(Constants.CAN.driveRightSlave);
+        fl = new WPI_VictorSPX(Constants.CAN.driveLeftMaster);
+        bl = new WPI_VictorSPX(Constants.CAN.driveLeftSlave);
 
         leftGroup = new SpeedControllerGroup(fl, bl);
         rightGroup = new SpeedControllerGroup(fr, br);

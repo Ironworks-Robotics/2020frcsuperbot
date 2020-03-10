@@ -2,12 +2,14 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants;
 
 public class Motors{
     public static VictorSPX intakeBelt;
-    public static VictorSPX turretFly;
+    public static CANSparkMax turretFly;
     public static VictorSPX turretAim;
     public static VictorSPX turretLoad;
     public static VictorSPX elevator;
@@ -17,7 +19,7 @@ public class Motors{
 
     public static void init(){
         intakeBelt = new VictorSPX(Constants.CAN.intakeBelt);
-        turretFly = new VictorSPX(Constants.CAN.turretFly);
+        turretFly = new CANSparkMax(Constants.CAN.turretFly, MotorType.kBrushless);
         turretAim = new VictorSPX(Constants.CAN.turretAim);
         turretLoad = new VictorSPX(Constants.CAN.turretLoad);
         elevator = new VictorSPX(Constants.CAN.elevator);
@@ -32,7 +34,7 @@ public class Motors{
             turretAim.set(ControlMode.PercentOutput, -aimSpeed);
             return false;
         } else if (Vision.getTargetFound()) {
-            turretFly.set(ControlMode.PercentOutput, 1);
+            turretFly.set(1);
             return true;
         }
         return false;
@@ -49,7 +51,7 @@ public class Motors{
     }
 
     public static void aimOff() {
-        turretFly.set(ControlMode.PercentOutput, 0);
+        turretFly.set(0);
         turretAim.set(ControlMode.PercentOutput, 0);
     }
 
@@ -81,7 +83,7 @@ public class Motors{
     }
 
     public static void manualFly(double speed) {
-        turretFly.set(ControlMode.PercentOutput, speed);
+        turretFly.set(speed);
     }
 
     public static void manualLoad(double speed) {
