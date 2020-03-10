@@ -49,17 +49,21 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotInit(){
+        /* CONTROLLER INIT */
         _gamepadDrive = new XboxController(Constants.JOYSTICKS.xbox);
         _gamepadShoot = new Joystick(Constants.JOYSTICKS.ps4);
         _gamepadTemp = new Joystick(Constants.JOYSTICKS.temp);
 
+        /* GYRO INIT*/
         gyroBoy = new ADXRS450_Gyro();
         gyroBoy.calibrate();
 
-        timer = new Timer();
-        
-        camera = CameraServer.getInstance().startAutomaticCapture(0);
 
+        timer = new Timer();
+        camera = CameraServer.getInstance().startAutomaticCapture(0);
+        irSensor = new DigitalInput(Constants.DIO.irSensor);
+
+        /* SUBSYSTEMS */
         Vision.init();
         Motors.init();
         Drivetrain.init(false, true);
@@ -67,24 +71,28 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic(){
+        /* GYRO */
         angle = gyroBoy.getAngle();
         rate = gyroBoy.getRate();
         gyroConnected = gyroBoy.isConnected();
         if (angle > 360) {
             angleNum = (int) angle % 360;
             angle -= 360 * angleNum;
-          }
+        }
       
           if (angle < 0) {
             angleNum = (int) angle % -360;
             angle += 360 * (angleNum + 1);
-          }
-
+        }
+        
+        /* SUBSYSTEMS */
         Vision.periodic();
         Dashboard.update();
 
-        xboxLS = _gamepadDrive.getX(Left); // LS horizontal axis
-        xboxRS = _gamepadDrive.getX(Right); // RS horizontal axis
+        /* CONTROLLER INPUT DETECTION */
+        // Currently, all stick axis inputs are only horizontal (because vertical is unused)
+        xboxLS = _gamepadDrive.getX(Left);
+        xboxRS = _gamepadDrive.getX(Right);
         xboxLT = _gamepadDrive.getTriggerAxis(Left);
         xboxRT = _gamepadDrive.getTriggerAxis(Right);
         xboxLB = _gamepadDrive.getBumper(Left);
@@ -150,8 +158,6 @@ public class Robot extends TimedRobot {
         locked = false;
 
         tempController = false;
-
-        irSensor = new DigitalInput(Constants.DIO.irSensor);
     }
 
     @Override
@@ -174,7 +180,7 @@ public class Robot extends TimedRobot {
             if (enableElevator) {
                 Motors.liftElevator(xboxRB, xboxLB); // RB to drop, LB to lift
             }
-            
+
         } else {
             /*** TEMP CONTROLLER CONTROLS ***/
             // This is disabled by default
