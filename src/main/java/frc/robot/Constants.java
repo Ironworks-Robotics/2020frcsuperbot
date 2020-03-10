@@ -43,6 +43,9 @@ public class Constants{
 
         /* INTAKE */
         public static final int intakeBelt = 11;
+
+        /* ELEVATOR */
+        public static final int elevator = 8;
     }
 
     public static class JOYSTICKS{
