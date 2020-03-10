@@ -32,4 +32,11 @@ public class Drivetrain{
         
         return drivetrain;
     }
+    public static void disable(){
+        fr.set(0);
+        br.set(0);
+        fl.set(0);
+        bl.set(0);
+    }
+
 }
