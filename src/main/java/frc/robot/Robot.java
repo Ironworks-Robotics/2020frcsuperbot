@@ -29,10 +29,10 @@ public class Robot extends TimedRobot {
   // double current[] = new double[16];
 
   /** Drive Motor Controllers */
-  CANSparkMax rightMaster = new CANSparkMax(1, MotorType.kBrushless);
-  CANSparkMax rightSlave = new CANSparkMax(2, MotorType.kBrushless);
-  CANSparkMax leftMaster = new CANSparkMax(3, MotorType.kBrushless);
-  CANSparkMax leftSlave = new CANSparkMax(4, MotorType.kBrushless);
+  CANSparkMax rightMaster = new CANSparkMax(1, MotorType.kBrushed);
+  CANSparkMax rightSlave = new CANSparkMax(2, MotorType.kBrushed);
+  CANSparkMax leftMaster = new CANSparkMax(3, MotorType.kBrushed);
+  CANSparkMax leftSlave = new CANSparkMax(4, MotorType.kBrushed);
 
   SpeedControllerGroup leftGrouping = new SpeedControllerGroup(leftMaster, leftSlave);
   SpeedControllerGroup rightGrouping = new SpeedControllerGroup(rightMaster, rightSlave);
@@ -64,6 +64,7 @@ public class Robot extends TimedRobot {
   /** Gamepad */
   XboxController _gamepadDrive = new XboxController(0); // driving
   Joystick _gamepadShoot = new Joystick(1); // turret control
+  Joystick temp = new Joystick(2);
 
   /** Vision / Raspberry Pi */
 
@@ -291,9 +292,13 @@ public class Robot extends TimedRobot {
      ******************************/
     /** Gamepad Drive processing */
     // forward is RT axis minus LT axis (scaled to [-1, 1])
+
+    /*
     forward = _gamepadDrive.getTriggerAxis(GenericHID.Hand.kRight)
         - _gamepadDrive.getTriggerAxis(GenericHID.Hand.kLeft);
+    */
 
+    forward = temp.getRawAxis(4) - temp.getRawAxis(3);
     /*
      * // limit the acceleration / decceleration if (forward > 0) { if ((forward -
      * prevVal) >= 0.07) { forward = prevVal + 0.07; }P } else { if ((forward -
@@ -310,7 +315,8 @@ public class Robot extends TimedRobot {
       forward *= -1;
     }
 
-    turn = Deadband(_gamepadDrive.getX(GenericHID.Hand.kLeft));
+    //turn = Deadband(_gamepadDrive.getX(GenericHID.Hand.kLeft));
+    turn = Deadband(temp.getRawAxis(0));
 
     /** check safety mode */
     if (_gamepadDrive.getStartButtonPressed()) // start button toggles safety
