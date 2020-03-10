@@ -14,9 +14,9 @@ public class Drivetrain{
     private static CANSparkMax bl;
     private static SpeedControllerGroup leftGroup;
     private static SpeedControllerGroup rightGroup;
-    private static DifferentialDrive drivetrain;
+    public static DifferentialDrive drivetrain;
 
-    public static DifferentialDrive init(boolean leftInvert, boolean rightInvert){
+    public static void init(boolean leftInvert, boolean rightInvert){
         fr = new CANSparkMax(Constants.CAN.driveRightMaster, MotorType.kBrushless);
         br = new CANSparkMax(Constants.CAN.driveRightSlave, MotorType.kBrushless);
         fl = new CANSparkMax(Constants.CAN.driveLeftMaster, MotorType.kBrushless);
@@ -29,9 +29,8 @@ public class Drivetrain{
         rightGroup.setInverted(rightInvert);
 
         drivetrain = new DifferentialDrive(leftGroup, rightGroup);
-        
-        return drivetrain;
     }
+
     public static void disable(){
         fr.set(0);
         br.set(0);
@@ -39,4 +38,19 @@ public class Drivetrain{
         bl.set(0);
     }
 
+    public static void drivePeriodic(double forward, double turn, boolean safety, boolean reverse){
+        if (safety) {
+            forward /= 4;
+            turn /= 4;
+        }
+        if (reverse) {
+            forward *= -1;
+            turn *= -1;
+        }
+        drivetrain.arcadeDrive(forward, turn);
+    }
+
+    public static void drivePeriodic(double forward, double turn){
+        drivetrain.arcadeDrive(forward, turn);
+    }
 }

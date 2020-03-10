@@ -33,11 +33,11 @@ public class Vision {
         return poseY;
     }
 
-    public static boolean targetFound(){
+    public static boolean getTargetFound(){
         return targetFound;
     }
 
-    public static double getAngle(){
+    public static double getCurrentAngle(){
         return currentAngle;
     }
 

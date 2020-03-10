@@ -1,7 +1,8 @@
 package frc.robot;
 
 public class Constants{
-    public static final int safetyDiv = 4;
+    public static final double angleTolerance = 5; // Deadzone for turret aim
+    public static final double aimSpeed = 0.3; // Default auto aim speed
 
     public static class PS4ID{
         /* BUTTON IDs (PS4) */
@@ -58,6 +59,11 @@ public class Constants{
         public static final String cameraName = "TurretCam";
     }
 
+    public static class DIO {
+        // IR sensor
+        public static final int irSensor = 0;
+    }
+
     /* PUBLIC METHODS BELOW */
     public static double expScale(double input) {
         if (input < 0) {
@@ -69,5 +75,13 @@ public class Constants{
 
     public static double linScale(double input) {
         return (input * 0.5) + 0.5;
+    }
+
+    public static double deadband(double input) {
+        if (input <= -0.02 || input >= 0.02){
+            return input;
+        } else {
+            return 0;
+        }
     }
 }
