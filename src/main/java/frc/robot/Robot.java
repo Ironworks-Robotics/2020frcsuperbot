@@ -30,14 +30,16 @@ public class Robot extends TimedRobot {
   // double current[] = new double[16];
 
   /** Drive Motor Controllers */
-  CANSparkMax rightMaster = new CANSparkMax(3, MotorType.kBrushless);
-  CANSparkMax leftMaster = new CANSparkMax(4, MotorType.kBrushless);
+  CANSparkMax rightMaster = new CANSparkMax(1, MotorType.kBrushless);
+  CANSparkMax rightSlave = new CANSparkMax(2, MotorType.kBrushless);
+  CANSparkMax leftMaster = new CANSparkMax(3, MotorType.kBrushless);
+  CANSparkMax leftSlave = new CANSparkMax(4, MotorType.kBrushless);
   
   
-  //SpeedControllerGroup leftGrouping = new SpeedControllerGroup(leftMaster, leftSide);
-  //SpeedControllerGroup rightGrouping = new SpeedControllerGroup(rightMaster, rightSide);
+  SpeedControllerGroup leftGrouping = new SpeedControllerGroup(leftMaster, leftSlave);
+  SpeedControllerGroup rightGrouping = new SpeedControllerGroup(rightMaster, rightSlave);
 
-  DifferentialDrive Drive = new DifferentialDrive(leftMaster, rightMaster);
+  DifferentialDrive Drive = new DifferentialDrive(leftGrouping, rightGrouping);
 
   /** Other Motor Controllers */
   /* the talon is broken
