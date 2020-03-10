@@ -65,7 +65,7 @@ public class Constants{
 
     /* PUBLIC METHODS BELOW */
     // This scales inputs into an exponetial ramp with base 2
-    // See: https://www.desmos.com/calculator/gxrlr34myi (f(x))
+    // See: https://www.desmos.com/calculator/l8ul4uoicw (f(x))
     public static double expScale(double input) {
         if (input < 0) {
          return -Math.pow(2, -input) + 1;
@@ -75,12 +75,13 @@ public class Constants{
     }
 
     // This scales input from [-1, 1] to [0, 1] linearly
-    // See: https://www.desmos.com/calculator/gxrlr34myi (g(x))
+    // See: https://www.desmos.com/calculator/l8ul4uoicw (g(x))
     public static double linScale(double input) {
         return (input * 0.5) + 0.5;
     }
 
     // Implement deadzone for stick axis values (must surpass +/- 0.02)
+    // See: https://www.desmos.com/calculator/l8ul4uoicw (p(x))
     public static double deadband(double input) {
         if (input <= -0.02 || input >= 0.02){
             return input;
