@@ -18,6 +18,7 @@ public class Robot extends TimedRobot {
     /* CONTROLLERS */
     XboxController _gamepadDrive; // Xbox controller to drive, elevator
     Joystick _gamepadShoot; // PS4 controller for turret, intake
+    Joystick _gamepadTemp; // PS4 controller temporary
 
     /* AUTO */
     Timer timer;
@@ -32,6 +33,7 @@ public class Robot extends TimedRobot {
     public static double forward, turn;
     public static boolean safety, reverse, enableElevator, manualOverride, locked;
     public static double intakeSpeed, aimSpeed;
+    public static boolean tempController;
 
     /* PERIPHERALS */
     public static DigitalInput irSensor;
@@ -49,6 +51,7 @@ public class Robot extends TimedRobot {
     public void robotInit(){
         _gamepadDrive = new XboxController(Constants.JOYSTICKS.xbox);
         _gamepadShoot = new Joystick(Constants.JOYSTICKS.ps4);
+        _gamepadTemp = new Joystick(Constants.JOYSTICKS.temp);
 
         gyroBoy = new ADXRS450_Gyro();
         gyroBoy.calibrate();
@@ -146,6 +149,8 @@ public class Robot extends TimedRobot {
 
         locked = false;
 
+        tempController = false;
+
         irSensor = new DigitalInput(Constants.DIO.irSensor);
     }
 
@@ -154,21 +159,42 @@ public class Robot extends TimedRobot {
         Motors.intakePeriodic(irSensor.get()); // intake on ball detection
 
         /*** XBOX CONTROLLER CONTROLS (_gamepadDrive) ***/
-        /* DRIVER CONTROLS */
-        forward = xboxRT - xboxLT;
-        turn = Constants.deadband(xboxLS);
+        if (!tempController) {
+            /* DRIVER CONTROLS */
+            forward = xboxRT - xboxLT;
+            turn = Constants.deadband(xboxLS);
 
-        safety = xboxStartPressed; // quarter speed/turns
-        reverse = xboxBackPressed; // invert controls
-        
-        Drivetrain.drivePeriodic(forward, turn, safety, reverse);
-        
-        /* ELEVATOR CONTROLS */
-        enableElevator = xboxXPressed;
-        if (enableElevator) {
-            Motors.liftElevator(xboxRB, xboxLB); // RB to drop, LB to lift
+            safety = xboxStartPressed; // quarter speed/turns
+            reverse = xboxBackPressed; // invert controls
+            
+            Drivetrain.drivePeriodic(forward, turn, safety, reverse);
+            
+            /* ELEVATOR CONTROLS */
+            enableElevator = xboxXPressed;
+            if (enableElevator) {
+                Motors.liftElevator(xboxRB, xboxLB); // RB to drop, LB to lift
+            }
+            
+        } else {
+            /*** TEMP CONTROLLER CONTROLS ***/
+            // This is disabled by default
+            // To enable, set tempController to true in teleopInit()
+            // This will disable the Xbox controller input
+            /*** DRIVER ***/
+            forward = Constants.linScale(_gamepadTemp.getRawAxis(Constants.PS4ID.r2a)) - Constants.linScale(_gamepadTemp.getRawAxis(Constants.PS4ID.l2a));
+            turn = Constants.deadband(_gamepadTemp.getRawAxis(Constants.PS4ID.l3h));
+
+            safety = _gamepadTemp.getRawButtonPressed(Constants.PS4ID.option);
+            reverse = _gamepadTemp.getRawButtonPressed(Constants.PS4ID.share);
+
+            Drivetrain.drivePeriodic(forward, turn, safety, reverse);
+
+            /*** ELEVATOR ***/
+            enableElevator = _gamepadTemp.getRawButtonPressed(Constants.PS4ID.square);
+            if (enableElevator) {
+                Motors.liftElevator(_gamepadTemp.getRawButton(Constants.PS4ID.l1), _gamepadTemp.getRawButton(Constants.PS4ID.r1));
+            }
         }
-        
         /*** PS4 CONTROLLER CONTROLS (_gamepadShoot) ***/
         manualOverride = ps4TouchpadPressed;
         /* AUTO AIM */

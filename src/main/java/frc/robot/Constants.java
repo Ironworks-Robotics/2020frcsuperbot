@@ -51,6 +51,7 @@ public class Constants{
     public static class JOYSTICKS{
         public static final int xbox = 0;
         public static final int ps4 = 1;
+        public static final int temp = 2;
     }
 
     public static class VISION{
