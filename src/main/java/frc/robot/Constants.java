@@ -1,10 +1,7 @@
 package frc.robot;
 
 public class Constants{
-    public static final double angleTolerance = 5; // Deadzone for turret aim
-    public static final double aimSpeed = 0.3; // Default auto aim speed
-
-    public static class PS4ID{
+        public static class PS4ID{
         /* BUTTON IDs (PS4) */
         public static final int square = 1;
         public static final int cross = 2;

@@ -15,12 +15,14 @@ public class Drivetrain{
     private static SpeedControllerGroup leftGroup;
     private static SpeedControllerGroup rightGroup;
     public static DifferentialDrive drivetrain;
+    public static final double safetyDiv = 4;
 
     public static void init(boolean leftInvert, boolean rightInvert){
-        fr = new CANSparkMax(Constants.CAN.driveRightMaster, MotorType.kBrushless);
-        br = new CANSparkMax(Constants.CAN.driveRightSlave, MotorType.kBrushless);
-        fl = new CANSparkMax(Constants.CAN.driveLeftMaster, MotorType.kBrushless);
-        bl = new CANSparkMax(Constants.CAN.driveLeftSlave, MotorType.kBrushless);
+        // init motor controllers
+        fr = new CANSparkMax(Constants.CAN.driveRightMaster, MotorType.kBrushed);
+        br = new CANSparkMax(Constants.CAN.driveRightSlave, MotorType.kBrushed);
+        fl = new CANSparkMax(Constants.CAN.driveLeftMaster, MotorType.kBrushed);
+        bl = new CANSparkMax(Constants.CAN.driveLeftSlave, MotorType.kBrushed);
 
         leftGroup = new SpeedControllerGroup(fl, bl);
         rightGroup = new SpeedControllerGroup(fr, br);
@@ -40,8 +42,8 @@ public class Drivetrain{
 
     public static void drivePeriodic(double forward, double turn, boolean safety, boolean reverse){
         if (safety) {
-            forward /= 4;
-            turn /= 4;
+            forward /= safetyDiv;
+            turn /= safetyDiv;
         }
         if (reverse) {
             forward *= -1;
