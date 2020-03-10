@@ -13,7 +13,6 @@ import edu.wpi.cscore.UsbCamera;
 // import edu.wpi.first.networktables.*;
 import edu.wpi.first.wpilibj.*;
 
-
 /*
 Required Dependencies
 wpilib API
@@ -30,31 +29,34 @@ public class Robot extends TimedRobot {
   // double current[] = new double[16];
 
   /** Drive Motor Controllers */
-  CANSparkMax rightMaster = new CANSparkMax(3, MotorType.kBrushless);
-  CANSparkMax leftMaster = new CANSparkMax(4, MotorType.kBrushless);
-  
-  
-  //SpeedControllerGroup leftGrouping = new SpeedControllerGroup(leftMaster, leftSide);
-  //SpeedControllerGroup rightGrouping = new SpeedControllerGroup(rightMaster, rightSide);
+  CANSparkMax rightMaster = new CANSparkMax(1, MotorType.kBrushless);
+  CANSparkMax rightSlave = new CANSparkMax(2, MotorType.kBrushless);
+  CANSparkMax leftMaster = new CANSparkMax(3, MotorType.kBrushless);
+  CANSparkMax leftSlave = new CANSparkMax(4, MotorType.kBrushless);
 
-  DifferentialDrive Drive = new DifferentialDrive(leftMaster, rightMaster);
+  SpeedControllerGroup leftGrouping = new SpeedControllerGroup(leftMaster, leftSlave);
+  SpeedControllerGroup rightGrouping = new SpeedControllerGroup(rightMaster, rightSlave);
+
+  DifferentialDrive Drive = new DifferentialDrive(leftGrouping, rightGrouping);
 
   /** Other Motor Controllers */
-  /* the talon is broken
-  TalonSRX toShoot = new TalonSRX(13); // brings the POWERCELL up to the actual firing mechanism
-  */
+  /*
+   * the talon is broken TalonSRX toShoot = new TalonSRX(13); // brings the
+   * POWERCELL up to the actual firing mechanism
+   */
   VictorSPX Shooter = new VictorSPX(9); // controls turret launch motor
   VictorSPX Aim = new VictorSPX(7); // controls turret aim motor
-  
+
   // IntakeWheel is now going to turn into toShoot
   // VictorSPX IntakeWheel = new VictorSPX(6); // controls the intake wheels
   VictorSPX toShoot = new VictorSPX(6);
 
   VictorSPX IntakeBelt = new VictorSPX(11); // controls the intake elevator motor
-  
-  /* getting rid of this trash
-  Victor IntakeUpandDown = new Victor(1); // controls the raising/lowering of intake bar itself
-  */
+
+  /*
+   * getting rid of this trash Victor IntakeUpandDown = new Victor(1); // controls
+   * the raising/lowering of intake bar itself
+   */
 
   VictorSPX elevator1 = new VictorSPX(8); // elevator system, used for two motors, two controllers
   VictorSPX elevator2 = new VictorSPX(10);
@@ -66,19 +68,16 @@ public class Robot extends TimedRobot {
   /** Vision / Raspberry Pi */
 
   /*
-  NetworkTableInstance table = NetworkTableInstance.getDefault();
-  NetworkTable cameraTable = table.getTable("chameleon-vision").getSubTable("TurretCam");
-  NetworkTableEntry targetX;
-  NetworkTableEntry poseArray; // 3D positioning [x distance meters, y distance meters, angle degrees]
-  NetworkTableEntry isValid;
-
-  boolean targetFound; // if a target was found
-  double rotationOffset; // Current offset
-  double angleTolerance = 5; // Deadzone for alignment
-  double poseX; // X distance in meters
-  double poseY; // Y distance in meters
-  double aimDist; // distance magnitude in meters (pythagorean)
-  */
+   * NetworkTableInstance table = NetworkTableInstance.getDefault(); NetworkTable
+   * cameraTable = table.getTable("chameleon-vision").getSubTable("TurretCam");
+   * NetworkTableEntry targetX; NetworkTableEntry poseArray; // 3D positioning [x
+   * distance meters, y distance meters, angle degrees] NetworkTableEntry isValid;
+   * 
+   * boolean targetFound; // if a target was found double rotationOffset; //
+   * Current offset double angleTolerance = 5; // Deadzone for alignment double
+   * poseX; // X distance in meters double poseY; // Y distance in meters double
+   * aimDist; // distance magnitude in meters (pythagorean)
+   */
 
   // autonomous
   int count = 0;
@@ -96,7 +95,7 @@ public class Robot extends TimedRobot {
   boolean gyroConnected = false;
 
   // speed divider
-  //double speedDiv = 4.0;
+  // double speedDiv = 4.0;
 
   // ramping
   double prevVal = 0;
@@ -174,11 +173,11 @@ public class Robot extends TimedRobot {
     lights.set(lightsOn);
 
     // Get initial values (Vision)
-/*
-    targetX = cameraTable.getEntry("yaw");
-    poseArray = cameraTable.getEntry("targetPose");
-    isValid = cameraTable.getEntry("isValid");
-*/
+    /*
+     * targetX = cameraTable.getEntry("yaw"); poseArray =
+     * cameraTable.getEntry("targetPose"); isValid =
+     * cameraTable.getEntry("isValid");
+     */
   }
 
   /* ROBOT PERIODIC */
@@ -189,18 +188,18 @@ public class Robot extends TimedRobot {
     // }
 
     /* Vision stuff */
-/*
-    rotationOffset = targetX.getDouble(0.0);
-    poseX = poseArray.getDoubleArray(new double[] { 0.0, 0.0, 0.0 })[0];
-    poseY = poseArray.getDoubleArray(new double[] { 0.0, 0.0, 0.0 })[1];
-
-    aimDist = Math.sqrt(Math.pow(poseX, 2) + Math.pow(poseY, 2));
-    targetFound = isValid.getBoolean(false);
-
-    SmartDashboard.putNumber("Aim Yaw: ", rotationOffset);
-    SmartDashboard.putNumber("Aim Distance: ", aimDist);
-    SmartDashboard.putBoolean("Target Found: ", targetFound);
-*/
+    /*
+     * rotationOffset = targetX.getDouble(0.0); poseX = poseArray.getDoubleArray(new
+     * double[] { 0.0, 0.0, 0.0 })[0]; poseY = poseArray.getDoubleArray(new double[]
+     * { 0.0, 0.0, 0.0 })[1];
+     * 
+     * aimDist = Math.sqrt(Math.pow(poseX, 2) + Math.pow(poseY, 2)); targetFound =
+     * isValid.getBoolean(false);
+     * 
+     * SmartDashboard.putNumber("Aim Yaw: ", rotationOffset);
+     * SmartDashboard.putNumber("Aim Distance: ", aimDist);
+     * SmartDashboard.putBoolean("Target Found: ", targetFound);
+     */
     // PS4 Controls
     cross = _gamepadShoot.getRawButton(2);
     circle = _gamepadShoot.getRawButton(3);
@@ -244,7 +243,6 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {
     // 719 long
     // 48 is 1 second
-    
 
     if (timer.get() <= 5) {
       Drive.arcadeDrive(0.5, 0);
@@ -289,7 +287,7 @@ public class Robot extends TimedRobot {
     }
 
     /******************************
-     * Driver Contro  ller (_gamepadDrive)
+     * Driver Contro ller (_gamepadDrive)
      ******************************/
     /** Gamepad Drive processing */
     // forward is RT axis minus LT axis (scaled to [-1, 1])
@@ -297,38 +295,30 @@ public class Robot extends TimedRobot {
         - _gamepadDrive.getTriggerAxis(GenericHID.Hand.kLeft);
 
     /*
-    // limit the acceleration / decceleration
-    if (forward > 0) {
-      if ((forward - prevVal) >= 0.07) {
-        forward = prevVal + 0.07;
-      }P
-    } else {
-      if ((forward - prevVal) <= -0.07) {
-        forward = prevVal - 0.07;
-      }
-    }
-
-    prevVal = forward;
-    */
+     * // limit the acceleration / decceleration if (forward > 0) { if ((forward -
+     * prevVal) >= 0.07) { forward = prevVal + 0.07; }P } else { if ((forward -
+     * prevVal) <= -0.07) { forward = prevVal - 0.07; } }
+     * 
+     * prevVal = forward;
+     */
 
     /** reverse button */
     if (_gamepadDrive.getBackButtonPressed()) // reverse controls if back button is pressed
       reverseControls = !reverseControls;
-    
+
     if (!reverseControls) {
       forward *= -1;
     }
 
     turn = Deadband(_gamepadDrive.getX(GenericHID.Hand.kLeft));
 
-   
     /** check safety mode */
     if (_gamepadDrive.getStartButtonPressed()) // start button toggles safety
       safety = !safety;
-    
+
     if (safety) {
-  //    forward /= speedDiv;
-  //    turn /= speedDiv;
+      // forward /= speedDiv;
+      // turn /= speedDiv;
     }
     /** Arcade Drive */
     Drive.arcadeDrive(turn, forward);
@@ -377,16 +367,12 @@ public class Robot extends TimedRobot {
     }
 
     /*
-    if (targetFound && aiming && !manualOverride) {
-      // Shooter.set(ControlMode.PercentOutput, getShootSpeed(aimDist)); // auto aim
-      // and set speed (ideally)
-      if (rotationOffset > angleTolerance) {
-        Aim.set(ControlMode.PercentOutput, -0.25);
-      } else if (rotationOffset < -angleTolerance) {
-        Aim.set(ControlMode.PercentOutput, 0.25);
-      }
-    }
-    */
+     * if (targetFound && aiming && !manualOverride) { //
+     * Shooter.set(ControlMode.PercentOutput, getShootSpeed(aimDist)); // auto aim
+     * // and set speed (ideally) if (rotationOffset > angleTolerance) {
+     * Aim.set(ControlMode.PercentOutput, -0.25); } else if (rotationOffset <
+     * -angleTolerance) { Aim.set(ControlMode.PercentOutput, 0.25); } }
+     */
 
     // Shooter override
     if (triangle) {
@@ -423,24 +409,19 @@ public class Robot extends TimedRobot {
     IntakeBelt.set(ControlMode.PercentOutput, intakeSpeed);
 
     // if (_gamepadShoot.getRawButtonPressed(6) && false) {
-    //  IntakeUpandDown.set(intakeMove ? 0.5 : -0.5);
+    // IntakeUpandDown.set(intakeMove ? 0.5 : -0.5);
     // }
 
     /*
-    if (Deadband(manualUpandDown) > 0) {
-      IntakeUpandDown.setRaw(255);
-    } else if (Deadband(manualUpandDown) < 0) {
-      IntakeUpandDown.setRaw(0);
-    } else {
-      IntakeUpandDown.setRaw(127);
-    }
-    */
+     * if (Deadband(manualUpandDown) > 0) { IntakeUpandDown.setRaw(255); } else if
+     * (Deadband(manualUpandDown) < 0) { IntakeUpandDown.setRaw(0); } else {
+     * IntakeUpandDown.setRaw(127); }
+     */
     /*
-    if (limitSwitchUpper.get() || limitSwitchLower.get() && false) { // if limit switch is hit, set speed 0
-      IntakeUpandDown.set(0.0);
-      intakeMove = !intakeMove; // toggle intakeMove to control raise/lower
-    }
-    */
+     * if (limitSwitchUpper.get() || limitSwitchLower.get() && false) { // if limit
+     * switch is hit, set speed 0 IntakeUpandDown.set(0.0); intakeMove =
+     * !intakeMove; // toggle intakeMove to control raise/lower }
+     */
 
     /** Smart Dashboard */
     SmartDashboard.putNumber("Angle: ", angle);
