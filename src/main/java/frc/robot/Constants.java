@@ -1,7 +1,7 @@
 package frc.robot;
 
 public class Constants{
-        public static class PS4ID{
+    public static class PS4ID{
         /* BUTTON IDs (PS4) */
         public static final int square = 1;
         public static final int cross = 2;
@@ -27,6 +27,7 @@ public class Constants{
         public static final int r3v = 5;
     }
 
+    /* Motor controller CAN IDs */
     public static class CAN {
         /* DRIVETRAIN */
         public static final int driveRightMaster = 1;
@@ -46,6 +47,7 @@ public class Constants{
         public static final int elevator = 8;
     }
 
+    /* Joystick port IDs */
     public static class JOYSTICKS{
         public static final int xbox = 0;
         public static final int ps4 = 1;
@@ -62,6 +64,8 @@ public class Constants{
     }
 
     /* PUBLIC METHODS BELOW */
+    // This scales inputs into an exponetial ramp with base 2
+    // See: https://www.desmos.com/calculator/gxrlr34myi (f(x))
     public static double expScale(double input) {
         if (input < 0) {
          return -Math.pow(2, -input) + 1;
@@ -70,10 +74,13 @@ public class Constants{
         }
     }
 
+    // This scales input from [-1, 1] to [0, 1] linearly
+    // See: https://www.desmos.com/calculator/gxrlr34myi (g(x))
     public static double linScale(double input) {
         return (input * 0.5) + 0.5;
     }
 
+    // Implement deadzone for stick axis values (must surpass +/- 0.02)
     public static double deadband(double input) {
         if (input <= -0.02 || input >= 0.02){
             return input;
