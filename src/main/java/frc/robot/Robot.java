@@ -37,6 +37,7 @@ public class Robot extends TimedRobot {
 
     /* PERIPHERALS */
     UsbCamera camera;
+    DigitalInput elevatorUpper, elevatorLower;
 
     /* CONTROLS */
     double xboxLT, xboxRT, xboxLS, xboxRS;
@@ -60,6 +61,8 @@ public class Robot extends TimedRobot {
 
         timer = new Timer();
         camera = CameraServer.getInstance().startAutomaticCapture(0);
+        elevatorUpper = new DigitalInput(0);
+        elevatorLower = new DigitalInput(1);
 
         /* SUBSYSTEMS */
         Vision.init();
@@ -175,7 +178,7 @@ public class Robot extends TimedRobot {
                 enableElevator = true;
             }
             if (enableElevator) {
-                Motors.liftElevator(xboxRB, xboxLB); // RB to drop, LB to lift
+                Motors.liftElevator(xboxRB, xboxLB, elevatorUpper.get(), elevatorLower.get()); // RB to drop, LB to lift
             }
 
         } else {
@@ -195,7 +198,7 @@ public class Robot extends TimedRobot {
             /*** ELEVATOR ***/
             enableElevator = _gamepadTemp.getRawButtonPressed(Constants.PS4ID.square);
             if (enableElevator) {
-                Motors.liftElevator(_gamepadTemp.getRawButton(Constants.PS4ID.l1), _gamepadTemp.getRawButton(Constants.PS4ID.r1));
+                Motors.liftElevator(_gamepadTemp.getRawButton(Constants.PS4ID.l1), _gamepadTemp.getRawButton(Constants.PS4ID.r1), elevatorUpper.get(), elevatorLower.get());
             }
         }
         /*** PS4 CONTROLLER CONTROLS (_gamepadShoot) ***/

@@ -56,10 +56,10 @@ public class Motors{
         turretAim.set(ControlMode.PercentOutput, 0);
     }
 
-    public static void liftElevator(boolean RB, boolean LB) {
-        if (RB && !LB) {
+    public static void liftElevator(boolean RB, boolean LB, boolean upperLimit, boolean lowerLimit) {
+        if (RB && !LB && !lowerLimit) {
             elevator.set(ControlMode.PercentOutput, -1); // RB to drop
-        } else if (LB && !RB) {
+        } else if (LB && !RB && !upperLimit) {
             elevator.set(ControlMode.PercentOutput, 1); // LB to lift
         } else {
             elevator.set(ControlMode.PercentOutput, 0);
