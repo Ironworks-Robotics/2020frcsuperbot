@@ -37,7 +37,7 @@ public class Robot extends TimedRobot {
 
     /* PERIPHERALS */
     UsbCamera camera;
-    DigitalInput elevatorUpper, elevatorLower;
+    public static DigitalInput elevatorUpper, elevatorLower;
 
     /* CONTROLS */
     double xboxLT, xboxRT, xboxLS, xboxRS;
@@ -104,8 +104,8 @@ public class Robot extends TimedRobot {
 
         ps4L1 = _gamepadShoot.getRawButton(Constants.PS4ID.l1);
         ps4R1 = _gamepadShoot.getRawButton(Constants.PS4ID.r1);
-        // ps4TouchpadPressed = _gamepadShoot.getRawButtonPressed(Constants.PS4ID.touchpad);
-        ps4Triangle = _gamepadShoot.getRawButtonPressed(Constants.PS4ID.triangle);
+        ps4TouchpadPressed = _gamepadShoot.getRawButtonPressed(Constants.PS4ID.touchpad);
+        ps4Triangle = _gamepadShoot.getRawButton(Constants.PS4ID.triangle);
         ps4L2 = _gamepadShoot.getRawAxis(Constants.PS4ID.l2a);
         ps4R2 = _gamepadShoot.getRawAxis(Constants.PS4ID.r2a);
         ps4L3 = _gamepadShoot.getRawAxis(Constants.PS4ID.l3h);
@@ -202,7 +202,7 @@ public class Robot extends TimedRobot {
             }
         }
         /*** PS4 CONTROLLER CONTROLS (_gamepadShoot) ***/
-        if(ps4TouchpadPressed) manualOverride = !manualOverride;
+        if (ps4TouchpadPressed) manualOverride = !manualOverride;
         intakeSpeed = Constants.expScale(Constants.linScale(ps4R2)) - Constants.expScale(Constants.linScale(ps4L2));
         /* AUTO AIM */
         if (!manualOverride) {
@@ -216,8 +216,9 @@ public class Robot extends TimedRobot {
         }
 
         /* MANUAL OVERRIDE */
-        aimSpeed = ps4R3;
+        aimSpeed = Constants.deadband(ps4R3);
         if (manualOverride){
+            Motors.manualIntake(intakeSpeed);
             Motors.manualAim(aimSpeed);
             if (ps4Triangle) {
                 Motors.manualFly(1);

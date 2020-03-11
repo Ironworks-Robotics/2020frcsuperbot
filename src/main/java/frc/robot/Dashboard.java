@@ -20,5 +20,8 @@ public class Dashboard{
         SmartDashboard.putBoolean("Vision Target Found", Vision.getTargetFound());
         SmartDashboard.putBoolean("Vision Target Locked", Robot.locked);
         SmartDashboard.putBoolean("Temp Controller", Robot.tempController);
+
+        SmartDashboard.putBoolean("Upper Limit", Robot.elevatorUpper.get());
+        SmartDashboard.putBoolean("Lower Limit", Robot.elevatorLower.get());
     }
 }

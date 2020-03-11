@@ -12,17 +12,17 @@ public class Motors{
     public static VictorSPX intakeBelt;
     public static CANSparkMax turretFly;
     public static VictorSPX turretAim;
-    public static VictorSPX turretLoad;
+    public static CANSparkMax turretLoad;
     public static TalonSRX elevator;
     public static Timer motorTimer;
     public static final double angleTolerance = 5; // Deadzone for turret aim
-    public static final double aimSpeed = 0.25; // Default auto aim speed
+    public static final double aimSpeed = 0.15; // Default auto aim speed
 
     public static void init(){
         intakeBelt = new VictorSPX(Constants.CAN.intakeBelt);
         turretFly = new CANSparkMax(Constants.CAN.turretFly, MotorType.kBrushless);
         turretAim = new VictorSPX(Constants.CAN.turretAim);
-        turretLoad = new VictorSPX(Constants.CAN.turretLoad);
+        turretLoad = new CANSparkMax(Constants.CAN.turretLoad, MotorType.kBrushed);
         elevator = new TalonSRX(Constants.CAN.elevator);
     }
 
@@ -44,10 +44,10 @@ public class Motors{
     public static void loadTurret(boolean on) {
         if (on) {
             intakeBelt.set(ControlMode.PercentOutput, 1);
-            turretLoad.set(ControlMode.PercentOutput, 1);
+            turretLoad.set(1);
         } else {
             intakeBelt.set(ControlMode.PercentOutput, 0);
-            turretLoad.set(ControlMode.PercentOutput, 0);
+            turretLoad.set(0);
         }
     }
 
@@ -57,9 +57,9 @@ public class Motors{
     }
 
     public static void liftElevator(boolean RB, boolean LB, boolean upperLimit, boolean lowerLimit) {
-        if (RB && !LB && !lowerLimit) {
+        if (RB && !LB && lowerLimit) {
             elevator.set(ControlMode.PercentOutput, -1); // RB to drop
-        } else if (LB && !RB && !upperLimit) {
+        } else if (LB && !RB && upperLimit) {
             elevator.set(ControlMode.PercentOutput, 1); // LB to lift
         } else {
             elevator.set(ControlMode.PercentOutput, 0);
@@ -84,6 +84,6 @@ public class Motors{
     }
 
     public static void manualLoad(double speed) {
-        turretLoad.set(ControlMode.PercentOutput, speed);
+        turretLoad.set(speed);
     }
 }
