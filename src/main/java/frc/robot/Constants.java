@@ -61,7 +61,8 @@ public class Constants{
 
     public static class DIO {
         // IR sensor
-        public static final int irSensor = 0;
+        public static final int elevatorUpper = 0;
+        public static final int elevatorLower = 1;
     }
 
     /* PUBLIC METHODS BELOW */

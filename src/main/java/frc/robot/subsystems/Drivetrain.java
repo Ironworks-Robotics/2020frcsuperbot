@@ -21,7 +21,7 @@ public class Drivetrain{
     private static SpeedControllerGroup leftGroup;
     private static SpeedControllerGroup rightGroup;
     public static DifferentialDrive drivetrain;
-    private static final double safetyDiv = 4;
+    private static final double safetyDiv = 3;
 
     public static void init(boolean leftInvert, boolean rightInvert){
         // init motor controllers

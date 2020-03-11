@@ -16,7 +16,7 @@ public class Motors{
     public static TalonSRX elevator;
     public static Timer motorTimer;
     public static final double angleTolerance = 5; // Deadzone for turret aim
-    public static final double aimSpeed = 0.15; // Default auto aim speed
+    public static final double aimSpeed = 0.2; // Default auto aim speed
 
     public static void init(){
         intakeBelt = new VictorSPX(Constants.CAN.intakeBelt);

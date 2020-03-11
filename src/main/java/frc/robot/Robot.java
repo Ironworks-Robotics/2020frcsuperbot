@@ -61,8 +61,8 @@ public class Robot extends TimedRobot {
 
         timer = new Timer();
         camera = CameraServer.getInstance().startAutomaticCapture(0);
-        elevatorUpper = new DigitalInput(0);
-        elevatorLower = new DigitalInput(1);
+        elevatorUpper = new DigitalInput(Constants.DIO.elevatorUpper);
+        elevatorLower = new DigitalInput(Constants.DIO.elevatorLower);
 
         /* SUBSYSTEMS */
         Vision.init();
