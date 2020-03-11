@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -12,7 +13,7 @@ public class Motors{
     public static CANSparkMax turretFly;
     public static VictorSPX turretAim;
     public static VictorSPX turretLoad;
-    public static VictorSPX elevator;
+    public static TalonSRX elevator;
     public static Timer motorTimer;
     public static final double angleTolerance = 5; // Deadzone for turret aim
     public static final double aimSpeed = 0.25; // Default auto aim speed
@@ -22,7 +23,7 @@ public class Motors{
         turretFly = new CANSparkMax(Constants.CAN.turretFly, MotorType.kBrushless);
         turretAim = new VictorSPX(Constants.CAN.turretAim);
         turretLoad = new VictorSPX(Constants.CAN.turretLoad);
-        elevator = new VictorSPX(Constants.CAN.elevator);
+        elevator = new TalonSRX(Constants.CAN.elevator);
     }
 
     public static boolean aimTurret() {
