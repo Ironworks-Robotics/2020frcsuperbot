@@ -40,7 +40,7 @@ public class Robot extends TimedRobot {
 
     /* CONTROLS */
     double xboxLT, xboxRT, xboxLS, xboxRS;
-    boolean xboxLB, xboxRB, xboxStartPressed, xboxBackPressed, xboxXPressed;
+    public static boolean xboxLB, xboxRB, xboxStartPressed, xboxBackPressed, xboxXPressed;
     boolean ps4L1, ps4R1, ps4TouchpadPressed, ps4Triangle;
     double ps4L2, ps4R2, ps4L3, ps4R3;
     GenericHID.Hand Left = GenericHID.Hand.kLeft;
@@ -101,7 +101,7 @@ public class Robot extends TimedRobot {
 
         ps4L1 = _gamepadShoot.getRawButton(Constants.PS4ID.l1);
         ps4R1 = _gamepadShoot.getRawButton(Constants.PS4ID.r1);
-        ps4TouchpadPressed = _gamepadShoot.getRawButtonPressed(Constants.PS4ID.touchpad);
+        // ps4TouchpadPressed = _gamepadShoot.getRawButtonPressed(Constants.PS4ID.touchpad);
         ps4Triangle = _gamepadShoot.getRawButtonPressed(Constants.PS4ID.triangle);
         ps4L2 = _gamepadShoot.getRawAxis(Constants.PS4ID.l2a);
         ps4R2 = _gamepadShoot.getRawAxis(Constants.PS4ID.r2a);
@@ -165,14 +165,15 @@ public class Robot extends TimedRobot {
             /* DRIVER CONTROLS */
             forward = xboxRT - xboxLT;
             turn = Constants.deadband(xboxLS);
-
-            safety = xboxStartPressed; // quarter speed/turns
-            reverse = xboxBackPressed; // invert controls
+            if(xboxStartPressed) safety = !safety;
+            if(xboxBackPressed) reverse = !reverse;
             
             Drivetrain.drivePeriodic(forward, turn, safety, reverse);
             
             /* ELEVATOR CONTROLS */
-            enableElevator = xboxXPressed;
+            if(xboxXPressed){
+                enableElevator = true;
+            }
             if (enableElevator) {
                 Motors.liftElevator(xboxRB, xboxLB); // RB to drop, LB to lift
             }
@@ -198,7 +199,7 @@ public class Robot extends TimedRobot {
             }
         }
         /*** PS4 CONTROLLER CONTROLS (_gamepadShoot) ***/
-        manualOverride = ps4TouchpadPressed;
+        if(ps4TouchpadPressed) manualOverride = !manualOverride;
         intakeSpeed = Constants.expScale(Constants.linScale(ps4R2)) - Constants.expScale(Constants.linScale(ps4L2));
         /* AUTO AIM */
         if (!manualOverride) {
