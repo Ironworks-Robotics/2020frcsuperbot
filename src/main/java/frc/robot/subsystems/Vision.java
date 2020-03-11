@@ -10,6 +10,7 @@ public class Vision {
     private static double poseX;
     private static double poseY;
     private static double poseAngle;
+    private static NetworkTableEntry driverMode;
     private static boolean targetFound;
 
     public static void init(){
@@ -23,6 +24,7 @@ public class Vision {
         poseY = cameraTable.getEntry("targetPose").getDoubleArray(new double[] { 0.0, 0.0, 0.0 })[1];
         poseAngle = cameraTable.getEntry("targetPose").getDoubleArray(new double[] { 0.0, 0.0, 0.0 })[2];
         targetFound = cameraTable.getEntry("isValid").getBoolean(false);
+        driverMode = cameraTable.getEntry("driverMode");
     }
 
     public static double getX(){
@@ -43,5 +45,9 @@ public class Vision {
 
     public static double getPoseAngle(){
         return poseAngle;
+    }
+
+    public static void setPipeline(boolean isDriver){
+        driverMode.setBoolean(isDriver);
     }
 }

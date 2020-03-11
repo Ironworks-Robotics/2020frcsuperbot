@@ -31,7 +31,7 @@ public class Robot extends TimedRobot {
 
     /* DRIVE AND TURRET*/
     public static double forward, turn;
-    public static boolean safety, reverse, enableElevator, manualOverride, locked;
+    public static boolean safety, reverse, enableElevator, manualOverride, locked, togglePipeline;
     public static double intakeSpeed, aimSpeed;
     public static boolean tempController;
 
@@ -42,7 +42,7 @@ public class Robot extends TimedRobot {
     /* CONTROLS */
     double xboxLT, xboxRT, xboxLS, xboxRS;
     public static boolean xboxLB, xboxRB, xboxStartPressed, xboxBackPressed, xboxXPressed;
-    boolean ps4L1, ps4R1, ps4TouchpadPressed, ps4Triangle;
+    boolean ps4L1, ps4R1, ps4TouchpadPressed, ps4Triangle, ps4SharePressed;
     double ps4L2, ps4R2, ps4L3, ps4R3;
     GenericHID.Hand Left = GenericHID.Hand.kLeft;
     GenericHID.Hand Right = GenericHID.Hand.kRight;
@@ -106,6 +106,7 @@ public class Robot extends TimedRobot {
         ps4R1 = _gamepadShoot.getRawButton(Constants.PS4ID.r1);
         ps4TouchpadPressed = _gamepadShoot.getRawButtonPressed(Constants.PS4ID.touchpad);
         ps4Triangle = _gamepadShoot.getRawButton(Constants.PS4ID.triangle);
+        ps4SharePressed = _gamepadShoot.getRawButtonPressed(Constants.PS4ID.share);
         ps4L2 = _gamepadShoot.getRawAxis(Constants.PS4ID.l2a);
         ps4R2 = _gamepadShoot.getRawAxis(Constants.PS4ID.r2a);
         ps4L3 = _gamepadShoot.getRawAxis(Constants.PS4ID.l3h);
@@ -160,6 +161,8 @@ public class Robot extends TimedRobot {
 
         // Enable this to use PS4 controller as drive instead of Xbox
         tempController = false;
+
+        togglePipeline = false;
     }
 
     @Override
@@ -205,8 +208,11 @@ public class Robot extends TimedRobot {
         /*** PS4 CONTROLLER CONTROLS (_gamepadShoot) ***/
         if (ps4TouchpadPressed) manualOverride = !manualOverride;
         intakeSpeed = Constants.expScale(Constants.linScale(ps4R2)) - Constants.expScale(Constants.linScale(ps4L2));
+        if (ps4SharePressed) togglePipeline = !togglePipeline; // change camera pipeline for chameleon vision (manual only)
+
         /* AUTO AIM */
         if (!manualOverride) {
+            Vision.setPipeline(false);
             if (ps4R1) {
                 locked = Motors.aimTurret(); // R1 to aim and start flywheel
             } else {
@@ -219,6 +225,11 @@ public class Robot extends TimedRobot {
         /* MANUAL OVERRIDE */
         aimSpeed = Constants.deadband(ps4R3);
         if (manualOverride){
+            if (togglePipeline){
+                Vision.setPipeline(true);
+            } else {
+                Vision.setPipeline(false);
+            }
             Motors.manualIntake(intakeSpeed);
             Motors.manualAim(aimSpeed);
             if (ps4Triangle) {
