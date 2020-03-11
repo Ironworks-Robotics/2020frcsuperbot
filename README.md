@@ -6,6 +6,7 @@ The entire folder itself is from a FRC Visual Studio project, and the robot code
 
 ## Control Scheme
 The Xbox One Controller will be used as the main driver controller. This controls the drivetrain and climb mechanism.
+
 Control | Purpose
 ------- | -------
 RT | Drivetrain forward
@@ -18,6 +19,7 @@ Menu | Toggle safety enable
 View | Toggle reverse controls
 
 The PS4 Controller will be used as the turret control.
+
 Control | Purpose
 ------- | -------
 RT | Intake in
