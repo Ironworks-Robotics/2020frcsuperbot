@@ -158,6 +158,7 @@ public class Robot extends TimedRobot {
 
         locked = false;
 
+        // Enable this to use PS4 controller as drive instead of Xbox
         tempController = false;
     }
 
@@ -175,7 +176,7 @@ public class Robot extends TimedRobot {
             
             /* ELEVATOR CONTROLS */
             if(xboxXPressed){
-                enableElevator = true;
+                enableElevator = !enableElevator;
             }
             if (enableElevator) {
                 Motors.liftElevator(xboxRB, xboxLB, elevatorUpper.get(), elevatorLower.get()); // RB to drop, LB to lift
