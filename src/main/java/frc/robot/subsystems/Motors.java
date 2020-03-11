@@ -65,10 +65,6 @@ public class Motors{
         }
     }
 
-    public static void intakePeriodic(boolean sensor) {
-        intakeBelt.set(ControlMode.PercentOutput, sensor ? 1 : 0); // start intake upon ball detection
-    }
-
     public static void manualAim(double speed) {
         speed = Constants.deadband(speed);
         if (speed == 0) {

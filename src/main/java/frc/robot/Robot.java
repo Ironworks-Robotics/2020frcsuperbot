@@ -36,7 +36,6 @@ public class Robot extends TimedRobot {
     public static boolean tempController;
 
     /* PERIPHERALS */
-    public static DigitalInput irSensor;
     UsbCamera camera;
 
     /* CONTROLS */
@@ -61,12 +60,11 @@ public class Robot extends TimedRobot {
 
         timer = new Timer();
         camera = CameraServer.getInstance().startAutomaticCapture(0);
-        irSensor = new DigitalInput(Constants.DIO.irSensor);
 
         /* SUBSYSTEMS */
         Vision.init();
         Motors.init();
-        Drivetrain.init(false, true);
+        Drivetrain.init(false, false);
     }
 
     @Override
@@ -162,8 +160,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
-        Motors.intakePeriodic(irSensor.get()); // intake on ball detection
-
         /*** XBOX CONTROLLER CONTROLS (_gamepadDrive) ***/
         if (!tempController) {
             /* DRIVER CONTROLS */
@@ -203,6 +199,7 @@ public class Robot extends TimedRobot {
         }
         /*** PS4 CONTROLLER CONTROLS (_gamepadShoot) ***/
         manualOverride = ps4TouchpadPressed;
+        intakeSpeed = Constants.expScale(Constants.linScale(ps4R2)) - Constants.expScale(Constants.linScale(ps4L2));
         /* AUTO AIM */
         if (!manualOverride) {
             if (ps4R1) {
@@ -210,16 +207,14 @@ public class Robot extends TimedRobot {
             } else {
                 Motors.aimOff();
             }
-
+            Motors.manualIntake(intakeSpeed);
             Motors.loadTurret((locked && ps4L1) ? true : false); // load turret if target locked and L1
         }
 
         /* MANUAL OVERRIDE */
         aimSpeed = ps4R3;
-        intakeSpeed = Constants.expScale(Constants.linScale(ps4R2)) - Constants.expScale(Constants.linScale(ps4L2));
         if (manualOverride){
             Motors.manualAim(aimSpeed);
-            Motors.manualIntake(intakeSpeed);
             if (ps4Triangle) {
                 Motors.manualFly(1);
                 Motors.manualLoad(1);

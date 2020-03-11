@@ -19,7 +19,5 @@ public class Dashboard{
         SmartDashboard.putNumber("Vision Angle", Vision.getCurrentAngle());
         SmartDashboard.putBoolean("Vision Target Found", Vision.getTargetFound());
         SmartDashboard.putBoolean("Vision Target Locked", Robot.locked);
-
-        SmartDashboard.putBoolean("Ball Detected", Robot.irSensor.get());
     }
 }
