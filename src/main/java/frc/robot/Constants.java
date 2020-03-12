@@ -60,7 +60,7 @@ public class Constants{
     }
 
     public static class DIO {
-        // IR sensor
+        // Limit switches
         public static final int elevatorUpper = 0;
         public static final int elevatorLower = 1;
     }
