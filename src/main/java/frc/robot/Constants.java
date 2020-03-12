@@ -61,6 +61,7 @@ public class Constants{
 
     public static class DIO {
         // Limit switches
+
         public static final int elevatorUpper = 0;
         public static final int elevatorLower = 1;
     }
@@ -85,7 +86,7 @@ public class Constants{
     // Implement deadzone for stick axis values (must surpass +/- 0.02)
     // See: https://www.desmos.com/calculator/l8ul4uoicw (p(x))
     public static double deadband(double input) {
-        if (input <= -0.02 || input >= 0.02){
+        if (input <= -0.05 || input >= 0.05){
             return input;
         } else {
             return 0;

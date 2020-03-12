@@ -160,7 +160,7 @@ public class Robot extends TimedRobot {
         locked = false;
 
         // Enable this to use PS4 controller as drive instead of Xbox
-        tempController = false;
+        tempController = true;
 
         togglePipeline = false;
     }
@@ -200,7 +200,7 @@ public class Robot extends TimedRobot {
             Drivetrain.drivePeriodic(forward, turn, safety, reverse);
 
             /*** ELEVATOR ***/
-            enableElevator = _gamepadTemp.getRawButtonPressed(Constants.PS4ID.square);
+            if (_gamepadTemp.getRawButtonPressed(Constants.PS4ID.square)) enableElevator = !enableElevator;
             if (enableElevator) {
                 Motors.liftElevator(_gamepadTemp.getRawButton(Constants.PS4ID.l1), _gamepadTemp.getRawButton(Constants.PS4ID.r1), elevatorUpper.get(), elevatorLower.get());
             }
@@ -211,6 +211,7 @@ public class Robot extends TimedRobot {
         if (ps4SharePressed) togglePipeline = !togglePipeline; // change camera pipeline for chameleon vision (manual only)
 
         /* AUTO AIM */
+        /*
         if (!manualOverride) {
             Vision.setPipeline(false);
             if (ps4R1) {
@@ -221,24 +222,16 @@ public class Robot extends TimedRobot {
             Motors.manualIntake(intakeSpeed);
             Motors.loadTurret((locked && ps4L1) ? true : false); // load turret if target locked and L1
         }
+        */
 
         /* MANUAL OVERRIDE */
         aimSpeed = Constants.deadband(ps4R3);
         if (manualOverride){
-            if (togglePipeline){
-                Vision.setPipeline(true);
-            } else {
-                Vision.setPipeline(false);
-            }
+            Vision.setPipeline(togglePipeline);
             Motors.manualIntake(intakeSpeed);
             Motors.manualAim(aimSpeed);
-            if (ps4Triangle) {
-                Motors.manualFly(1);
-                Motors.manualLoad(1);
-            } else {
-                Motors.manualFly(0);
-                Motors.manualLoad(0);
-            }
+            Motors.manualFly(ps4Triangle ? 1 : 0);
+            Motors.manualLoad(ps4L1 ? 1 : 0);
         }
     }
 }
