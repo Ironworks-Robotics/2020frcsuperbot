@@ -25,10 +25,10 @@ Control | Purpose
 RT | Intake in
 LT | Intake out
 RS X-axis | Turret aim
-L1 | Auto aim turret
-R1 | Fire turret
+L1 | Auto aim turret and run flywheel
+R1 | Load ball into turret (manual and auto)
 Touchpad | Toggle manual override
-Triangle | Manually load and fire turret (manual override)
+Triangle | Manually run turret flywheel (manual override)
 Share | Disable camera overlay (manual override)
 
 A second PS4 Controller can also be hooked up to act as a temporary drive controller in place of the Xbox Controller. To enable, set `tempController = true` in `teleopInit()` of [Robot.java](https://github.com/RandomBananazz/2020frcsuperbot/blob/betterstuff/src/main/java/frc/robot/Robot.java#L162). The controls remain equivalent to those on the Xbox Controller.
